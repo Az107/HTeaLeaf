@@ -1,7 +1,7 @@
 
-from TeaLeaf.Server.Server import HttpRequest, Server
+from .Server import HttpRequest, Server
 
-from TeaLeaf.Html.Component import Component
+from ..Html.Component import Component
 
 class WSGI(Server):
     def __init__(self):
