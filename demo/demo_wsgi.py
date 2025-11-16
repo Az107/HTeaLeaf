@@ -1,8 +1,8 @@
+
 from TeaLeaf.Server.Server import ServerEvent, Session
 from TeaLeaf.Magic.Store import AuthStore, SuperStore, Store
 from TeaLeaf.Magic.LocalState import use_state
 from TeaLeaf.Server.Server import HttpRequest
-from TeaLeaf.Server.WSGI import WSGI
 from TeaLeaf.Html.Elements import (
     header,
     checkbox,
@@ -23,6 +23,9 @@ from TeaLeaf.Html.Elements import (
 
 from TeaLeaf.utils import enable_reactivity, redirect
 from TeaLeaf.Magic.Common import JSCode, Not, Dom
+app = WSGI()
+
+application = app.wsgi_app
 
 
 def auth_session(session: Session):
@@ -30,7 +33,6 @@ def auth_session(session: Session):
         return session["userName"]
     return None
 
-app = WSGI()
 enable_reactivity(app)
 SuperStore(app)
 cstore = Store({"counter": 1})
@@ -140,6 +142,7 @@ def home(session, req: HttpRequest):
     if not session.has("userName"):
         return redirect("/login")
 
+
     modal_state = use_state(True)
     age = use_state(0)
     document = JSCode("document")
@@ -186,13 +189,6 @@ def home(session, req: HttpRequest):
         ),
     )
     return web
-
-
-application = app.wsgi_app  # Punto de entrada WSGI
-
-
-
-
 
 
 if __name__ == "__main__":

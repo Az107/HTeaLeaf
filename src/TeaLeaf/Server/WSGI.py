@@ -1,12 +1,20 @@
 
+from .Http.HttpHeader import Headers
 from typing import Iterator
 from .Server import HttpRequest, Server
 
 from ..Html.Component import Component
 
+
+def to_list(headers: Headers) -> list[tuple[str, str]]:
+    return [h for h in headers]
+
 class WSGI(Server):
     def __init__(self):
         super().__init__()
+
+
+
 
 
     def wsgi_app(self, environ: dict[str,str], start_response) -> Iterator[str | bytes]:
@@ -23,7 +31,7 @@ class WSGI(Server):
         body = environ.get('wsgi.input',"body")
         request = HttpRequest(method,path,headers=headers,body=body)
         response = self.handle_request(request)
-        start_response(response.status.to_str(), response.headers.to_list())
+        start_response(response.status.to_str(), to_list(response.headers))
         response_body: bytes = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
         return iter([response_body])
 

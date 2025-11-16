@@ -1,3 +1,4 @@
+from TeaLeaf.Server.Http.HttpHeader import Headers
 from .Server import HttpRequest
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Literal, Iterable, Optional
@@ -19,6 +20,8 @@ class Scope:
     client: tuple[str,int]
     server:  tuple[str, Optional[int]]
     state: Optional[dict[str,Any]]
+
+
 
 
 
@@ -46,6 +49,15 @@ def response_body(body: bytes = b"", more_body=False) -> dict[str,Any]:
     result["more_body"] = more_body
     return result
 
+
+
+def to_list(headers: Headers):
+    header_list = []
+    for (k,v) in headers:
+        header_list.append((k.encode("utf-8"), v.encode("utf-8")))
+    return header_list
+
+
 class ASGI(Server):
     def __init__(self):
         super().__init__()
@@ -60,6 +72,6 @@ class ASGI(Server):
         response = self.handle_request(request)
         body: bytes = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
 
-        await send(response_start(response.status.to_int(),iter(response.headers.to_list()),False))
+        await send(response_start(response.status.to_int(),iter(to_list(response.headers)),False))
 
         await send(response_body(body))

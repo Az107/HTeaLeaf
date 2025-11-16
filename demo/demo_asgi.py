@@ -20,9 +20,10 @@ from TeaLeaf.Html.Elements import (
     script,
     link
 )
-from TeaLeaf.Magic.MagicComponent import FetchComponent, rButton
+
 from TeaLeaf.utils import enable_reactivity, redirect
 from TeaLeaf.Magic.Common import JSCode, Not, Dom
+
 app = ASGI()
 
 
@@ -181,8 +182,6 @@ def home(session, req: HttpRequest):
         ),
     )
     return web
-
-
 
 
 async def application(scope, receive, send):

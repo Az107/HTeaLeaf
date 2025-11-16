@@ -9,6 +9,10 @@ class Headers():
             else:
                 self._data[k[0]] = k[1]
 
+    def __iter__(self):
+        for k in self._data:
+            yield (k, self._data[k])
+
 
     def __getitem__(self, key: str):
         return self._data.get(key.lower())
@@ -31,11 +35,6 @@ class Headers():
                 return self._data.get(k)
         return None
 
-    def to_list(self) -> list[tuple[bytes,bytes]]:
-        headers = []
-        for k in self._data:
-            headers.append((k.encode("utf-8"), self._data[k].encode("utf-8")))
-        return headers
 
     def __contains__(self, item):
         return item.lower() in self._data
