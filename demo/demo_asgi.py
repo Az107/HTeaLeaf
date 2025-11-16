@@ -64,7 +64,7 @@ def contar():
 @app.route("/hello/{name}")
 def saluda(name):
     return (
-        "200 Ok",
+        200,
         [("potato-header", "yay")],
         f"Hello {name}",
     )
@@ -85,7 +85,7 @@ def user(session, req: HttpRequest):
         return "Hello " + session.userName
     user = req.form()
     if user is None or not "userName" in user:
-        return "401 unauthorized", LoginPage()
+        return 401, LoginPage()
     else:
         session.userName = user["userName"]
         return redirect("/")
@@ -132,8 +132,8 @@ def logout(session):
 @app.route("/")
 def home(session, req: HttpRequest):
     if not session.has("userName"):
-        # return redirect("/login")
-        session["userName"] = "Alb"
+        return redirect("/login")
+
 
     modal_state = use_state(True)
     age = use_state(0)

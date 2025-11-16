@@ -70,7 +70,7 @@ def contar():
 @app.route("/hello/{name}")
 def saluda(name):
     return (
-        "200 Ok",
+        200,
         [("potato-header", "yay")],
         f"Hello {name}",
     )
@@ -91,7 +91,7 @@ def user(session, req: HttpRequest):
         return "Hello " + session.userName
     user = req.form()
     if user is None or not "userName" in user:
-        return "401 unauthorized", LoginPage()
+        return 401, LoginPage()
     else:
         session.userName = user["userName"]
         return redirect("/")

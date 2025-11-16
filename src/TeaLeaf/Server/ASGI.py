@@ -53,11 +53,13 @@ class ASGI(Server):
 
     async def application(self,scope: dict,
                           receive: Callable[[], Awaitable[dict]],
-                          send: Callable[[dict], Awaitable[None]]):
+                          send: Callable[[Any], Awaitable[None]]):
         event = await receive()
-        print(event)
+        headers = [(k.decode(), v.decode()) for k,v in scope["headers"]]
+        request = HttpRequest(scope["method"],scope["path"],headers=headers,body=event["body"])
+        response = self.handle_request(request)
+        body: bytes = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
 
-        request = HttpRequest(scope["method"],scope["path"],headers=dict(),body=event["body"])
-        status, headers, body = self.handle_request(request)
-        await send(response_start(200,[],False))
-        await send(response_body("".join(body).encode("utf-8")))
+        await send(response_start(response.status.to_int(),iter(response.headers.to_list()),False))
+
+        await send(response_body(body))

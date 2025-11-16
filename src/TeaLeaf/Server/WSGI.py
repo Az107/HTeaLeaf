@@ -1,4 +1,5 @@
 
+from typing import Iterator
 from .Server import HttpRequest, Server
 
 from ..Html.Component import Component
@@ -8,7 +9,7 @@ class WSGI(Server):
         super().__init__()
 
 
-    def wsgi_app(self, environ: dict[str,str], start_response):
+    def wsgi_app(self, environ: dict[str,str], start_response) -> Iterator[str | bytes]:
         path = environ.get('PATH_INFO', '/')
         method = environ.get('REQUEST_METHOD', 'GET')
         headers = {}
@@ -21,9 +22,10 @@ class WSGI(Server):
                 headers[k[5:]] = environ[k]
         body = environ.get('wsgi.input',"body")
         request = HttpRequest(method,path,headers=headers,body=body)
-        status, headers, body = self.handle_request(request)
-        start_response(status, headers)
-        return iter([b.encode('utf-8') for b in body])
+        response = self.handle_request(request)
+        start_response(response.status.to_str(), response.headers.to_list())
+        response_body: bytes = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
+        return iter([response_body])
 
     def serve(self, payload: str | Component):
         return super().serve(payload)

@@ -2,7 +2,7 @@ from TeaLeaf.Html.Component import Component
 from TeaLeaf.Html.Elements import script
 from TeaLeaf.Server.Server import Server, ServerEvent
 def redirect(path: str):
-    return "302 Found", [("Location", path)], ""
+    return 302, [("Location", path)], ""
 
 
 def enable_reactivity(server: Server):
