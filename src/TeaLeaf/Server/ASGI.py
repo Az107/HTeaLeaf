@@ -25,11 +25,11 @@ class Scope:
 
 
 
-@dataclass
-class receiveEvent:
-    type: str
-    body: bytes
-    more_body: bool # if True wait for all the body chunks
+# dict struct
+# recive event:
+#     type: str
+#     body: bytes
+#     more_body: bool # if True wait for all the body chunks
 
 
 def response_start(status: int, headers: Iterable[tuple[bytes,bytes]], trailers: bool) -> dict[str,Any]:
@@ -66,9 +66,14 @@ class ASGI(Server):
     async def application(self,scope: dict,
                           receive: Callable[[], Awaitable[dict]],
                           send: Callable[[Any], Awaitable[None]]):
-        event = await receive()
+        body: bytes = bytes()
+        more = True
+        while more:
+            event = await receive()
+            more = event["more_body"]
+            body += event["body"]
         headers = [(k.decode(), v.decode()) for k,v in scope["headers"]]
-        request = HttpRequest(scope["method"],scope["path"],headers=headers,body=event["body"])
+        request = HttpRequest(scope["method"],scope["path"],headers=headers,body=body)
         response = self.handle_request(request)
         body: bytes = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
 

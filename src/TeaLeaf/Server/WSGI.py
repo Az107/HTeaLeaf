@@ -17,7 +17,7 @@ class WSGI(Server):
 
 
 
-    def wsgi_app(self, environ: dict[str,str], start_response) -> Iterator[str | bytes]:
+    def wsgi_app(self, environ: dict[str,str], start_response) -> Iterator[bytes]:
         path = environ.get('PATH_INFO', '/')
         method = environ.get('REQUEST_METHOD', 'GET')
         headers = {}
