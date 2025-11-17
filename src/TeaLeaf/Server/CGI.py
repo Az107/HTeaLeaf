@@ -2,11 +2,11 @@ import os
 import sys
 from urllib.parse import parse_qs
 
-from TeaLeaf.Server import Server
-from TeaLeaf.Html.Component import Component
+from .Server import Server
+from ..Html.Component import Component
 
 
-class CGI(Server.Server):
+class CGI(Server):
     def __init__(self) -> None:
         super().__init__()
         input_data = sys.stdin.read()

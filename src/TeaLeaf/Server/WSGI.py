@@ -1,14 +1,23 @@
 
-from TeaLeaf.Server.Server import HttpRequest, Server
+from .Http.HttpHeader import Headers
+from typing import Iterator
+from .Server import HttpRequest, Server
 
-from TeaLeaf.Html.Component import Component
+from ..Html.Component import Component
+
+
+def to_list(headers: Headers) -> list[tuple[str, str]]:
+    return [h for h in headers]
 
 class WSGI(Server):
     def __init__(self):
         super().__init__()
 
 
-    def wsgi_app(self, environ: dict[str,str], start_response):
+
+
+
+    def wsgi_app(self, environ: dict[str,str], start_response) -> Iterator[bytes]:
         path = environ.get('PATH_INFO', '/')
         method = environ.get('REQUEST_METHOD', 'GET')
         headers = {}
@@ -21,9 +30,10 @@ class WSGI(Server):
                 headers[k[5:]] = environ[k]
         body = environ.get('wsgi.input',"body")
         request = HttpRequest(method,path,headers=headers,body=body)
-        status, headers, body = self.handle_request(request)
-        start_response(status, headers)
-        return iter([b.encode('utf-8') for b in body])
+        response = self.handle_request(request)
+        start_response(response.status.to_str(), to_list(response.headers))
+        response_body: bytes = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
+        return iter([response_body])
 
     def serve(self, payload: str | Component):
         return super().serve(payload)

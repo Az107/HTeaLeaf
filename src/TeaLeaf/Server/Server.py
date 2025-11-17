@@ -1,6 +1,10 @@
+
+from TeaLeaf.Html.Elements import head
+from .Http.HttpHeader import Headers
+from .Http.HttpResponse import HttpResponse, HttpStatus
+from .Http.HttpRequest import HttpRequest
 from TeaLeaf.Html.Component import Component
 import inspect
-import io
 import json
 import os
 import re
@@ -77,101 +81,6 @@ class Session(dict):
         self[attr] = value
 
 
-class Headers():
-    def __init__(self, data: dict[str,str] = {}):
-        self._data: dict[str, str] = {}
-        for k in data:
-            self._data[k.lower()] = data[k]
-
-    def __getitem__(self, key: str):
-        return self._data.get(key.lower())
-
-
-    def __setitem__(self, name: str, value: str) -> None:
-        self._data[name.lower()] = value
-
-
-    def get(self, key: str):
-        return self._data.get(key.lower())
-
-
-    def __contains__(self, item):
-        return item.lower() in self._data
-
-
-class HttpRequest:
-    """
-    Represents an HTTP request with attributes for method, path, headers, and body.
-    """
-
-    def __init__(
-        self,
-        method: str = "GET",
-        path: str = "/",
-        args: dict[str, str] = {},
-        headers: dict[str, str] = {},
-        body: str | bytes | io.BufferedReader | None = None,
-    ):
-        self.method: str = method
-        self.path: str = path
-        self.args: dict[str, str] = args
-        self.headers: Headers = Headers(headers)
-        self.body: str | bytes | io.BufferedReader | Any | None = body
-
-    def text(self) -> str | None:
-        return self.__body_to_text__()
-
-    def __body_to_text__(self) -> str | None:
-        if "content_length" not in self.headers:
-            return None
-
-        body_size = int(self.headers.get("content_length") or 0)
-        if body_size == 0 or self.body is None:
-            return None
-        if isinstance(self.body, io.BufferedReader):
-            if not self.body.closed and self.body.readable():
-                return self.body.read(body_size).decode("utf-8")
-            else:
-                return None
-        elif isinstance(self.body, bytes):
-            return self.body.decode("utf-8")
-        elif isinstance(self.body, str):
-            return self.body
-        elif hasattr(self.body, '__iter__'):
-            result = b"".join([d for d in iter(self.body)])
-            return result.decode("utf-8")
-        else:
-            raise ValueError(f"Invalid body type: {type(self.body)}")
-
-    def form(self) -> dict[str, str] | None:
-        """
-        Parses form-encoded body data into a dictionary.
-
-        Returns:
-            dict[str, str] | None: A dictionary of form values or None if invalid.
-        """
-
-        body = self.__body_to_text__()
-        if body is None:
-            return None
-        return dict(item.split("=", 1) for item in body.split("&") if "=" in item)
-
-    def json(self) -> Optional[dict]:
-        """
-        Parses the request body as JSON.
-
-        Returns:
-            dict | None: A dictionary representation of the JSON body or None if invalid.
-        """
-
-        body = self.__body_to_text__()
-        if body is None:
-            return None
-        try:
-            return json.loads(body)
-        except (json.JSONDecodeError, AttributeError):
-            return None
-
 
 def match_path(
     routes: dict[str, typing.Callable], path: str
@@ -197,7 +106,7 @@ def match_path(
 def return_helper():
     try:
         helper = open(os.path.dirname(__file__) + "/helper.js")
-        return "200 Ok", helper.read()
+        return 200 , helper.read()
     except Exception as e:
         print(e)
         return "404 Not Found", "Not Found"
@@ -272,18 +181,18 @@ class Server:
 
         return self.sessions[session_id], header_session_cookie
 
-    def __process_response__(self, response):
-        res_code = "200 OK"
-        res_headers = []
+    def __process_response__(self, response) -> HttpResponse:
+        res_code = HttpStatus.Ok
+        res_headers = Headers()
         if isinstance(response, tuple):
             if len(response) == 3:
-                res_code, res_headers, res_body = response
+                res_code, headers, res_body = response
+                res_headers = Headers(headers)
+
             elif len(response) == 2:
                 res_code, res_body = response
-                res_headers = []
             else:
                 res_body = response[0]
-                res_code, res_headers = "200 OK", []
         else:
             res_body = response
 
@@ -296,32 +205,34 @@ class Server:
             content_type = "application/json"
             res_body = json.dumps(res_body)
 
-        res_headers.append(("Content-Type", content_type))
-        return res_code, res_headers, res_body
+        res_headers.add("Content-Type", content_type)
+        return HttpResponse(res_code, res_headers, res_body)
 
-    def handle_request(self, request: HttpRequest):
+
+    def handle_request(self, request: HttpRequest) -> HttpResponse:
         handler_and_match = match_path(self.routes, request.path)
         self.__call_hook__(ServerEvent.on_request, request)
-        if handler_and_match:
-            params, handler = handler_and_match
-            params["req"] = request
+        if handler_and_match is None:
+            return HttpResponse(HttpStatus.NotFound, [("Content-Type", "text/plain")], "Not Found")
 
-            _cookies = request.headers.get("COOKIE") or ""
-            cookies = {
-                k.strip(): v.strip()
-                for k, v in (c.split("=", 1) for c in _cookies.split(";") if "=" in c)
-            }
+        params, handler = handler_and_match
+        params["req"] = request
+        _cookies = request.headers.get("COOKIE") or ""
+        cookies = {
+            k.strip(): v.strip()
+            for k, v in (c.split("=", 1) for c in _cookies.split(";") if "=" in c)
+        }
 
-            params["session"], session_header = self.__handle_session__(cookies)
-            params["cookies"] = cookies
-            sig = inspect.signature(handler)
-            params = {k: v for k, v in params.items() if k in sig.parameters}
-            response = handler(**params)
-            res_code, headers, res_body = self.__process_response__(response)
-            if session_header is not None:
-                headers.append(session_header)
-            return res_code, headers, [res_body]
-        return "404 Not Found", [("Content-Type", "text/plain")], ["Not Found"]
+
+        params["session"], session_header = self.__handle_session__(cookies)
+        params["cookies"] = cookies
+        sig = inspect.signature(handler)
+        params = {k: v for k, v in params.items() if k in sig.parameters}
+        response = handler(**params)
+        response = self.__process_response__(response)
+        if session_header is not None:
+            response.headers.add(session_header[0], session_header[1])
+        return response
 
     def serve(self, payload: str | Component):
         pass

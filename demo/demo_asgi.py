@@ -1,5 +1,5 @@
-
-from TeaLeaf.Server.Server import ServerEvent, Session
+from TeaLeaf.Server.ASGI import ASGI
+from TeaLeaf.Server.Server import Session
 from TeaLeaf.Magic.Store import AuthStore, SuperStore, Store
 from TeaLeaf.Magic.LocalState import use_state
 from TeaLeaf.Server.Server import HttpRequest
@@ -23,9 +23,8 @@ from TeaLeaf.Html.Elements import (
 
 from TeaLeaf.utils import enable_reactivity, redirect
 from TeaLeaf.Magic.Common import JSCode, Not, Dom
-app = WSGI()
 
-application = app.wsgi_app
+app = ASGI()
 
 
 def auth_session(session: Session):
@@ -37,12 +36,6 @@ enable_reactivity(app)
 SuperStore(app)
 cstore = Store({"counter": 1})
 todoStore = AuthStore(auth_session, {"todo": []})
-
-def on_new_session(id, session):
-    print(f"New session: {id}")
-    session["userName"] = "ALb"
-
-app.registry_hook(ServerEvent.new_session, on_new_session)
 
 mincss_url = "https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
 mincss = link().attr(rel="stylesheet",href=mincss_url)
@@ -191,12 +184,5 @@ def home(session, req: HttpRequest):
     return web
 
 
-if __name__ == "__main__":
-    from wsgiref.simple_server import make_server
-
-    with make_server("", 8000, application) as server:
-        print("Serving on http://127.0.0.1:8000")
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-           print("\rBye")
+async def application(scope, receive, send):
+    await app.application(scope, receive, send)
