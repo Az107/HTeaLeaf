@@ -1,5 +1,6 @@
 
 from TeaLeaf.Server.Server import ServerEvent, Session
+from TeaLeaf.Server.WSGI import WSGI
 from TeaLeaf.Magic.Store import AuthStore, SuperStore, Store
 from TeaLeaf.Magic.LocalState import use_state
 from TeaLeaf.Server.Server import HttpRequest
@@ -38,11 +39,6 @@ SuperStore(app)
 cstore = Store({"counter": 1})
 todoStore = AuthStore(auth_session, {"todo": []})
 
-def on_new_session(id, session):
-    print(f"New session: {id}")
-    session["userName"] = "ALb"
-
-app.registry_hook(ServerEvent.new_session, on_new_session)
 
 mincss_url = "https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
 mincss = link().attr(rel="stylesheet",href=mincss_url)
@@ -58,8 +54,8 @@ def health(req: HttpRequest):
 
 
 
-@app.route("/contar")
-def contar():
+@app.route("/counter")
+def counter():
 
     return div(
         button("-").attr(onclick=cstore.do.update("counter",cstore.read("counter") - 1)),
@@ -171,9 +167,9 @@ def home(session, req: HttpRequest):
                 ).row()
             ),
             button("toggle modal").attr(onclick=modal_state.set(Not(modal_state.get()))),
-            div("Esto es modal").classes("card").row().attr(hidden=modal_state.get()),
+            div("This is modal").classes("card").row().attr(hidden=modal_state.get()),
             div(
-                contar(),
+                counter(),
                 div([elementoCompra(idx, c) for idx,c in enumerate(todoStore.auth(session).read("todo"))]).style(
                     padding="20px",
                     height="200px",
