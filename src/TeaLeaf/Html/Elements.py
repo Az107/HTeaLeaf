@@ -1,8 +1,9 @@
-from TeaLeaf.Html.Component import Component, ComponentMeta
-from typing import Union, List, Any
 import re
-from TeaLeaf.Html.JSCode import JSCode
 import sys
+from typing import Any, List, Union
+
+from TeaLeaf.Html.Component import Component, ComponentMeta
+from TeaLeaf.Html.JSCode import JSCode
 
 
 class html(Component, metaclass=ComponentMeta):
