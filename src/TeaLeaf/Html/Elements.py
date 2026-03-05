@@ -1,13 +1,13 @@
-from TeaLeaf.Html.Component import Component, ComponentMeta
-from typing import Union, List, Any
 import re
-from TeaLeaf.Html.JSCode import JSCode
 import sys
+from typing import Any, List, Union
+
+from TeaLeaf.Html.Component import Component, ComponentMeta
+from TeaLeaf.Html.JSCode import JSCode
 
 
 class html(Component, metaclass=ComponentMeta):
     pass
-
 
 class head(Component, metaclass=ComponentMeta):
     pass
@@ -16,13 +16,15 @@ class header(Component, metaclass=ComponentMeta):
     pass
 
 class link(Component, metaclass=ComponentMeta):
-    pass
+    def __init__(self, *childs):
+        super().__init__("link", *childs)
+
 
 class script(Component):
     def __init__(self, *childs: Union[str, List[Any], "Component"] ,src=None):
         super().__init__("script", *childs)
         self.unsafe = True
-        if src != None:
+        if src is not None:
             self.attr(src=src)
             self.children = [""]
         else:

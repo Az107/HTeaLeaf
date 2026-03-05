@@ -1,8 +1,8 @@
-from TeaLeaf.Server.Http.HttpHeader import Headers
-from .Server import HttpRequest
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Literal, Iterable, Optional
-from .Server import Server
+from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
+
+from .Http.HttpHeader import Headers
+from .Server import HttpRequest, Server
 
 
 @dataclass
@@ -75,7 +75,7 @@ class ASGI(Server):
         headers = [(k.decode(), v.decode()) for k,v in scope["headers"]]
         request = HttpRequest(scope["method"],scope["path"],headers=headers,body=body)
         response = self.handle_request(request)
-        body: bytes = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
+        body = response.body.encode("utf-8") if isinstance(response.body, str) else response.body
 
         await send(response_start(response.status.to_int(),iter(to_list(response.headers)),False))
 

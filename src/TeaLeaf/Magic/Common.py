@@ -1,10 +1,10 @@
-import re
 import json
+import re
+from typing import Any
 from uuid import uuid4
-from typing import Dict, Any
 
-from TeaLeaf.Html.JSCode import JSCode
 from TeaLeaf.Html.Elements import script
+from TeaLeaf.Html.JSCode import JSCode
 
 
 class JSDO:

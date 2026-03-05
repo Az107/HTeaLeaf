@@ -1,9 +1,9 @@
 
-from .Http.HttpHeader import Headers
 from typing import Iterator
-from .Server import HttpRequest, Server
 
 from ..Html.Component import Component
+from .Http.HttpHeader import Headers
+from .Server import HttpRequest, Server
 
 
 def to_list(headers: Headers) -> list[tuple[str, str]]:
@@ -12,8 +12,6 @@ def to_list(headers: Headers) -> list[tuple[str, str]]:
 class WSGI(Server):
     def __init__(self):
         super().__init__()
-
-
 
 
 

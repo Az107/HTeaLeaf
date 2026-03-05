@@ -1,30 +1,29 @@
 
-from TeaLeaf.Server.Server import ServerEvent, Session
-from TeaLeaf.Server.WSGI import WSGI
-from TeaLeaf.Magic.Store import AuthStore, SuperStore, Store
-from TeaLeaf.Magic.LocalState import use_state
-from TeaLeaf.Magic.HelperMidleware import enable_reactivity
-from TeaLeaf.Server.Server import HttpRequest
 from TeaLeaf.Html.Elements import (
-    header,
-    checkbox,
-    head,
-    form,
-    html,
-    div,
-    textInput,
+    body,
     button,
+    checkbox,
+    div,
+    form,
     h1,
     h2,
     h3,
-    submit,
-    body,
+    head,
+    header,
+    html,
+    link,
     script,
-    link
+    submit,
+    textInput,
 )
-
+from TeaLeaf.Magic.Common import JSCode, Not
+from TeaLeaf.Magic.HelperMidleware import enable_reactivity
+from TeaLeaf.Magic.LocalState import use_state
+from TeaLeaf.Magic.Store import AuthStore, Store, SuperStore
+from TeaLeaf.Server.Server import HttpRequest, Session
+from TeaLeaf.Server.WSGI import WSGI
 from TeaLeaf.utils import redirect
-from TeaLeaf.Magic.Common import JSCode, Not, Dom
+
 app = WSGI()
 
 application = app.wsgi_app
@@ -90,7 +89,7 @@ def user(session, req: HttpRequest):
         return "Hello " + session.userName
     user = req.form()
     print(user)
-    if user is None or not "userName" in user:
+    if user is None or "userName" not in user:
         return 401, LoginPage()
     else:
         session.userName = user["userName"]

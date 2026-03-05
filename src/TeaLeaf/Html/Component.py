@@ -1,10 +1,6 @@
-import json
 import hashlib
-from typing import List, Union, Any
-import html as html_tools
-
-
-
+import json
+from typing import Any, List, Union
 
 
 class Component:

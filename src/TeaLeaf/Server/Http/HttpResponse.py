@@ -2,12 +2,13 @@ from enum import Enum
 
 from .HttpHeader import Headers
 
+
 class HttpResponse:
-    status: HttpStatus
+    status: "HttpStatus"
     headers: Headers
     body: str | bytes
 
-    def __init__(self, status: HttpStatus | tuple[int,str] | int, headers: Headers | list[tuple[str,str]], body: str | bytes, / ):
+    def __init__(self, status: "HttpStatus" | tuple[int,str] | int, headers: Headers | list[tuple[str,str]], body: str | bytes, / ):
         if isinstance(status, HttpStatus):
             self.status = status
         elif isinstance(status,tuple):
