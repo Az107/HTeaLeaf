@@ -1,29 +1,27 @@
-from TeaLeaf.Server.ASGI import ASGI
-from TeaLeaf.Server.Server import Session
-from TeaLeaf.Magic.Store import AuthStore, SuperStore, Store
-from TeaLeaf.Magic.LocalState import use_state
-from TeaLeaf.Server.Server import HttpRequest
 from TeaLeaf.Html.Elements import (
-    header,
-    checkbox,
-    head,
-    form,
-    html,
-    div,
-    textInput,
+    body,
     button,
+    checkbox,
+    div,
+    form,
     h1,
     h2,
     h3,
-    submit,
-    body,
+    head,
+    header,
+    html,
+    link,
     script,
-    link
+    submit,
+    textInput,
 )
-
-from TeaLeaf.utils import redirect
+from TeaLeaf.Magic.Common import JSCode, Not
 from TeaLeaf.Magic.HelperMidleware import enable_reactivity
-from TeaLeaf.Magic.Common import JSCode, Not, Dom
+from TeaLeaf.Magic.LocalState import use_state
+from TeaLeaf.Magic.Store import AuthStore, Store, SuperStore
+from TeaLeaf.Server.ASGI import ASGI
+from TeaLeaf.Server.Server import HttpRequest, Session
+from TeaLeaf.utils import redirect
 
 app = ASGI()
 
@@ -86,7 +84,7 @@ def user(session, req: HttpRequest):
     if session.has("userName"):
         return "Hello " + session.userName
     user = req.form()
-    if user is None or not "userName" in user:
+    if user is None or "userName" not in user:
         return 401, LoginPage()
     else:
         session.userName = user["userName"]

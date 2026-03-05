@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
 
-from TeaLeaf.Server.Http.HttpHeader import Headers
-
+from .Http.HttpHeader import Headers
 from .Server import HttpRequest, Server
 
 

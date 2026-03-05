@@ -1,19 +1,17 @@
 
-from TeaLeaf.Html.Elements import head
-from .Http.HttpHeader import Headers
-from .Http.HttpResponse import HttpResponse, HttpStatus
-from .Http.HttpRequest import HttpRequest
-from TeaLeaf.Html.Component import Component
 import inspect
 import json
 import os
 import re
 import typing
-from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Callable
 from uuid import uuid4
 
+from ..Html.Component import Component
+from .Http.HttpHeader import Headers
+from .Http.HttpRequest import HttpRequest
+from .Http.HttpResponse import HttpResponse, HttpStatus
 
 
 def path_to_regex(path: str) -> str:
