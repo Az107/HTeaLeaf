@@ -1,4 +1,5 @@
-import uuid
+import json
+import hashlib
 from typing import List, Union, Any
 import html as html_tools
 
@@ -21,10 +22,23 @@ class Component:
         """
 
         self.styles: str | None = None
-        self._id: str = "tl" + str(uuid.uuid4())
         self.name = name
         self.children: list[Component | str | list] = list(childs)
         self.attributes: dict[str, str | None] = dict()
+        self._id: str = self._generate_id()
+
+    def _generate_id(self) -> str:
+        """Genera un ID determinista basado en el contenido del componente."""
+        content = {
+            "name": self.name,
+            "children": [
+                child._id if isinstance(child, Component) else str(child)
+                for child in self.children
+            ]
+        }
+        raw = json.dumps(content, sort_keys=True)
+        hash_str = hashlib.md5(raw.encode()).hexdigest()[:12]
+        return f"tl-{hash_str}"
 
     def id(self, id: str):
         """
@@ -57,11 +71,12 @@ class Component:
         :return: The component instance (for method chaining).
         """
 
+
         self.styles = (self.styles or "") + f"#{self._id} {{\n"
         self.styles += "\n".join(
             f"  {k.replace('_', '-')}: {v};" for k, v in attr.items()
         )
-        self.styles += "\n}"
+        self.styles += "\n}\n"
 
         if path:
             with open(path, "r") as f:

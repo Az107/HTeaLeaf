@@ -21,7 +21,8 @@ from TeaLeaf.Html.Elements import (
     link
 )
 
-from TeaLeaf.utils import enable_reactivity, redirect
+from TeaLeaf.utils import redirect
+from TeaLeaf.Magic.HelperMidleware import enable_reactivity
 from TeaLeaf.Magic.Common import JSCode, Not, Dom
 
 app = ASGI()
