@@ -3,6 +3,7 @@ from TeaLeaf.Server.Server import ServerEvent, Session
 from TeaLeaf.Server.WSGI import WSGI
 from TeaLeaf.Magic.Store import AuthStore, SuperStore, Store
 from TeaLeaf.Magic.LocalState import use_state
+from TeaLeaf.Magic.HelperMidleware import enable_reactivity
 from TeaLeaf.Server.Server import HttpRequest
 from TeaLeaf.Html.Elements import (
     header,
@@ -22,7 +23,7 @@ from TeaLeaf.Html.Elements import (
     link
 )
 
-from TeaLeaf.utils import enable_reactivity, redirect
+from TeaLeaf.utils import redirect
 from TeaLeaf.Magic.Common import JSCode, Not, Dom
 app = WSGI()
 
@@ -88,6 +89,7 @@ def user(session, req: HttpRequest):
     if session.has("userName"):
         return "Hello " + session.userName
     user = req.form()
+    print(user)
     if user is None or not "userName" in user:
         return 401, LoginPage()
     else:
@@ -162,7 +164,7 @@ def home(session, req: HttpRequest):
         body(
             header(
                 div(
-                    h1("TeaLeaf!").style(color="green"),
+                    h1("HTeaLeaf!").style(color="green"),
                     button(f"Welcome {session["userName"]}").attr(onclick=window.location.replace("/logout")),
                 ).row()
             ),

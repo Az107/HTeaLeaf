@@ -20,6 +20,7 @@ class JSDO:
 
         def mark_js(obj):
             if isinstance(obj, JSCode):
+
                 return f"__JS__:{obj.raw}"
             elif isinstance(obj, (list, tuple)):
                 return [mark_js(o) for o in obj]
@@ -42,7 +43,9 @@ class JSDO:
     def get(self, *args):
         return self.__format_js__("get", *args)
 
+
     def set(self, *args):
+        print("args:", args)
         return self.__format_js__("set", *args)
 
     def update(self, *args):

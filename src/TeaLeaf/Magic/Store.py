@@ -146,8 +146,10 @@ class Store:
         if item in parent:
             pointer = parent[item]
             if type(pointer) is dict:
-                pointer = pointer | data
+                parent[item].update(data)
             elif type(pointer) is list:
+                if not hasattr(data, "key"):
+                    data["key"] = str(uuid4())
                 pointer.append(data)
             else:
                 return None
