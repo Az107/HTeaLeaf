@@ -3,15 +3,16 @@ import re
 from typing import Any
 from uuid import uuid4
 
-from TeaLeaf.Html.Elements import script
-from TeaLeaf.Html.JSCode import JSCode
+from ..Html.Elements import script
+from ..Html.JSCode import JSCode
 
 
 class JSDO:
     def __init__(self, object_name: str, arg: Any):
         # js_file = os.path.dirname(__file__) + "/Store.js"
         self.obj_name = f"{object_name.lower()}_{str(uuid4())[:5]}"
-        self.store_js = f"const {self.obj_name} = new {object_name}({json.dumps(arg)})"
+        self.store_js = f"const {self.obj_name} = new {object_name}({json.dumps(arg)}); {self.obj_name}.id = '{self.obj_name}';"
+
 
     def __call__(self):
         return JSCode(self.obj_name)

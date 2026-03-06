@@ -2,7 +2,6 @@ import json
 from typing import Any
 
 
-
 class JSCode:
     def __init__(self, raw: str):
         self.raw = raw
@@ -32,10 +31,23 @@ class JSCode:
         return JSCode(f"({self.raw} / {other})")
 
     def call(self, *args):
-        payload = ",".join(
-            json.dumps(a) if not isinstance(a, JSCode) else str(a) for a in args
-        )
+        from ..Magic.Store import AuthStore, Store
+        parsed = []
+        for arg in args:
+            if isinstance(arg, JSCode):
+                arg = str(arg)
+            if isinstance(arg, str):
+                arg = json.dumps(arg)
+            if isinstance(arg, bool):
+                arg = str(arg).lower()
+            if isinstance(arg, Store) or isinstance(arg, AuthStore):
+                arg = str(arg.do())
+            print(arg)
+            parsed.append(arg)
+
+        payload = ",".join(parsed)
         return JSCode(f"{self.raw}({payload})")
+
 
     def __call__(self, *args: Any):
         return self.call(*args)

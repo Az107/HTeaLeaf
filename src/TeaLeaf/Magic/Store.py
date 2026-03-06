@@ -1,12 +1,12 @@
 import copy
-from typing import Any
 import json
+from typing import Any
 from uuid import uuid4
-from TeaLeaf.Html.Component import Component
-from TeaLeaf.Html.Elements import div
-from TeaLeaf.Server.Server import HttpRequest, Server, ServerEvent, Session
-from TeaLeaf.Magic.Common import JSDO
 
+from ..Html.Component import Component
+from ..Html.Elements import div
+from ..Magic.Common import JSDO
+from ..Server.Server import HttpRequest, Server, ServerEvent, Session
 
 
 class SuperStore:
@@ -38,7 +38,7 @@ class SuperStore:
     def len(self):
         return len(self.stores)
 
-    def add(self, id, store: Store | AuthStore):
+    def add(self, id, store: "Store | AuthStore"):
         self.stores[id] = store
 
     def process(self,session: Session, req: HttpRequest, api_id):

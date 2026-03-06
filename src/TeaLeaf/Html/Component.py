@@ -2,6 +2,8 @@ import hashlib
 import json
 from typing import Any, List, Union
 
+from .JSCode import JSCode
+
 
 class Component:
     """
@@ -9,7 +11,7 @@ class Component:
     This class allows constructing HTML elements programmatically and managing CSS styles.
     """
 
-    def __init__(self, name, *childs: Union[str, List[Any], "Component"]) -> None:
+    def __init__(self, name, *childs: Union[str, List[Any], "Component", "JSCode"]) -> None:
         """
         Initializes a new Component instance.
 
@@ -19,7 +21,7 @@ class Component:
 
         self.styles: str | None = None
         self.name = name
-        self.children: list[Component | str | list] = list(childs)
+        self.children: list[Component | str | list | JSCode] = list(childs)
         self.attributes: dict[str, str | None] = dict()
         self._id: str = self._generate_id()
 
@@ -110,6 +112,17 @@ class Component:
         self.children.append(child)
         return self
 
+    def prepend(self, child: Union[str, "Component", list]):
+        """
+        Prepends a child element to the component.
+
+        :param child: A Component, string, or list of elements.
+        :return: The component instance (for method chaining).
+        """
+
+        self.children.insert(0, child)
+        return self
+
     def __build_attr__(self) -> str:
         return " " + " ".join(
             f"{k}='{v}'" if v is not None else f"{k}" for k, v in self.attributes.items()
@@ -129,6 +142,13 @@ class Component:
                 html, css = child.build()
                 html_parts.append(html)
                 css_parts.append(css)
+            # elif isinstance(child, JSDO):
+            #     print(f"JSCode: {child().raw}")
+            #     html_parts.append(f"{{{{{child().raw}}}}}")
+            elif isinstance(child, JSCode):
+                # JSCode outside of an attribute should be a special tag {{jscode_name}}
+                print(f"JSCode: {child.raw}")
+                html_parts.append(f"{{{{{child.raw}}}}}")
             else:
                 try:
                     html_parts.append(str(child))

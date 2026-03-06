@@ -1,18 +1,42 @@
 class LocalState {
   constructor(init_val) {
+    this.id = "";
     this.val = init_val;
+    this._nodes = [];
+    document.addEventListener("DOMContentLoaded", () => {
+      this._render(null, init_val);
+    });
   }
 
   set(data) {
+    const old = this.val;
     this.val = data;
-  }
-
-  update(data) {
-    this.val = data;
+    this._render(old, this.val);
   }
 
   get() {
     return this.val;
+  }
+
+  _render(old, val) {
+    if (this._nodes.length === 0) {
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+      );
+      let node;
+      const tag = `{{${this.id}}}`;
+      while ((node = walker.nextNode())) {
+        if (node.nodeValue.includes(tag)) {
+          this._nodes.push(node);
+          node.nodeValue = node.nodeValue.replaceAll(tag, val);
+        }
+      }
+    } else {
+      for (let node of this._nodes) {
+        node.nodeValue = node.nodeValue.replaceAll(old, val);
+      }
+    }
   }
 }
 
@@ -75,7 +99,6 @@ function authority_zero(a, b) {
     return;
   }
   for (const [vdom, dom] of zip(a.children, b.children)) {
-    //if (vdom.id.startsWith("tlmg")) continue;
     if (vdom.isEqualNode(dom)) continue;
     if (vdom.children.length == 0) {
       dom.innerHTML = vdom.innerHTML;

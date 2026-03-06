@@ -1,5 +1,4 @@
-from TeaLeaf.Magic.Common import JSDO
-
+from ..Magic.Common import JSDO
 
 # class localState():
 #     def __init__(self, init_state):
