@@ -19,11 +19,8 @@ from TeaLeaf.Magic.Common import JSCode, Not
 from TeaLeaf.Magic.HelperMidleware import enable_reactivity
 from TeaLeaf.Magic.LocalState import use_state
 from TeaLeaf.Magic.Store import AuthStore, Store, SuperStore
-from TeaLeaf.Server.ASGI import ASGI
-from TeaLeaf.Server.Server import HttpRequest, Session
+from TeaLeaf.Server.Server import HttpRequest, Server, Session
 from TeaLeaf.utils import redirect
-
-app = ASGI()
 
 
 def auth_session(session: Session):
@@ -31,15 +28,32 @@ def auth_session(session: Session):
         return session["userName"]
     return None
 
-enable_reactivity(app)
-SuperStore(app)
-cstore = Store({"counter": 1})
-todoStore = AuthStore(auth_session, {"todo": []})
+
+cstore: Store | None = None
+todoStore: AuthStore | None = None
+
+def init(app: Server):
+    global cstore
+    global todoStore
+    print("test")
+
+    enable_reactivity(app)
+    SuperStore(app)
+    cstore = Store({"counter": 1})
+    todoStore = AuthStore(auth_session, {"todo": []})
+    app.add_path("/health", health)
+    app.add_path("/contar", contar)
+    app.add_path("/hello/{name}", saluda)
+    app.add_path("/login", user)
+    app.add_path("/example", userNav)
+    app.add_path("/logout", logout)
+    app.add_path("/", home)
+
+
 
 mincss_url = "https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
 mincss = link().attr(rel="stylesheet",href=mincss_url)
 
-@app.route("/health")
 def health(req: HttpRequest):
     return {
         "status": "ok",
@@ -50,8 +64,9 @@ def health(req: HttpRequest):
 
 
 
-@app.route("/contar")
 def contar():
+    if cstore is None:
+        return None
 
     return div(
         button("-").attr(onclick=cstore.do.update("counter",cstore.read("counter") - 1)),
@@ -61,7 +76,6 @@ def contar():
 
 
 
-@app.route("/hello/{name}")
 def saluda(name):
     return (
         200,
@@ -79,7 +93,7 @@ def LoginPage():
     )
 
 
-@app.route("/login")
+
 def user(session, req: HttpRequest):
     if session.has("userName"):
         return "Hello " + session.userName
@@ -91,7 +105,6 @@ def user(session, req: HttpRequest):
         return redirect("/")
 
 
-@app.route("/example")
 def userNav(req: HttpRequest):
     user = req.json()
     if user is None:
@@ -111,6 +124,9 @@ def userNav(req: HttpRequest):
 
 
 def elementoCompra(id, task):
+    if todoStore is None:
+        return None
+
     return div(
         checkbox(checked=task["done"]).attr(
             onchange=todoStore.do.update(
@@ -123,21 +139,24 @@ def elementoCompra(id, task):
 
 
 
-@app.route("/logout")
+
 def logout(session):
     if session.has("userName"):
         del session["userName"]
     return redirect("/login")
 
-@app.route("/")
+
 def home(session, req: HttpRequest):
+    if todoStore is None:
+        return None
+
     if not session.has("userName"):
         return redirect("/login")
 
 
     modal_state = use_state(True)
     age = use_state(0)
-    document = JSCode("document")
+    _document = JSCode("document")
     window = JSCode("window")
     addTodoIfNotEmpty = JSCode("addTodoIfNotEmpty")
     web = html(
@@ -153,7 +172,9 @@ def home(session, req: HttpRequest):
                     alert("empty task")
                 }
             }
-            """)
+            """),
+            age.new(),
+            modal_state.new()
         ),
         body(
             header(
@@ -163,7 +184,12 @@ def home(session, req: HttpRequest):
                 ).row()
             ),
             button("toggle modal").attr(onclick=modal_state.set(Not(modal_state.get()))),
-            div("Esto es modal").classes("card").row().attr(hidden=modal_state.get()),
+            div("Esto es modal: ", modal_state()).classes("card").row().attr(hidden=modal_state.get()),
+            div(
+                button("-").attr(onclick=age.set(age.get() - 1)),
+                age(),
+                button("+").attr(onclick=age.set(age.get() + 1))
+            ).classes("card").row(),
             div(
                 contar(),
                 div([elementoCompra(idx, c) for idx,c in enumerate(todoStore.auth(session).read("todo"))]).style(
@@ -174,14 +200,10 @@ def home(session, req: HttpRequest):
                 div(
                     textInput().id("item_compra"),
                     button("Create").attr(
-                        onclick=addTodoIfNotEmpty("item_compra",todoStore.do())
+                        onclick=addTodoIfNotEmpty("item_compra",todoStore)
                     ),
                 ).row(),
             )
         ),
     )
     return web
-
-
-async def application(scope, receive, send):
-    await app.application(scope, receive, send)

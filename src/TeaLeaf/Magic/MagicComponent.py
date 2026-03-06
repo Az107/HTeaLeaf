@@ -1,10 +1,10 @@
-import os
 import json
+import os
 import uuid
 from typing import Any
 
-from TeaLeaf.Html.Component import Component
-from TeaLeaf.Html.Elements import div, script
+from ..Html.Component import Component
+from ..Html.Elements import div, script
 
 
 class FetchComponent(Component):
@@ -26,10 +26,10 @@ class FetchComponent(Component):
         # Configuración de la petición
         config = {"method": "POST" if body is not None else "GET", "body": body }
         # Serializar la configuración en JSON para JS
-        js_file = os.path.dirname(__file__) + "/MagicComponent.js"
+        _js_file = os.path.dirname(__file__) + "/MagicComponent.js"
         url = json.dumps(url)
         config_js = json.dumps(config)
-        id = json.dumps(placeholder._id)
+        _id = json.dumps(placeholder._id)
         js: str = f"fetchAndUpdate({url},{config_js},{placeholder._id})"
 
         self.append(script(js))

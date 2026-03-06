@@ -2,8 +2,7 @@ import re
 import sys
 from typing import Any, List, Union
 
-from TeaLeaf.Html.Component import Component, ComponentMeta
-from TeaLeaf.Html.JSCode import JSCode
+from .Component import Component, ComponentMeta
 
 
 class html(Component, metaclass=ComponentMeta):
@@ -22,6 +21,7 @@ class link(Component, metaclass=ComponentMeta):
 
 class script(Component):
     def __init__(self, *childs: Union[str, List[Any], "Component"] ,src=None):
+        from .JSCode import JSCode
         super().__init__("script", *childs)
         self.unsafe = True
         if src is not None:
