@@ -1,6 +1,6 @@
-from components import init
-
 from TeaLeaf.Server.ASGI import ASGI
+
+from .components import init
 
 app = ASGI()
 

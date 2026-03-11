@@ -4,7 +4,7 @@ from typing import Any
 from uuid import uuid4
 
 from ..Html.Elements import script
-from ..Html.JSCode import JSCode
+from .JSCode import JSCode
 
 
 class JSDO:
@@ -59,11 +59,3 @@ class JSDO:
 
 def Dom(query):
     return JSCode(f"""document.querySelector(`{query}`)""")
-
-
-def Not(code: JSCode):
-    return JSCode(f"!{code}")
-
-
-def Set(code: JSCode, other: Any):
-    return JSCode(f"{code.raw} = {other}")

@@ -30,6 +30,19 @@ class JSCode:
     def __truediv__(self, other):
         return JSCode(f"({self.raw} / {other})")
 
+    def eq(self, other):
+        return JSCode(f"({self.raw} == {other})")
+
+    def ne(self, other):
+        return JSCode(f"({self.raw} != {other})")
+
+    def gt(self, other):
+        return JSCode(f"({self.raw} > {other})")
+
+    def lt(self, other):
+        return JSCode(f"({self.raw} < {other})")
+
+
     def call(self, *args):
         from ..Magic.Store import AuthStore, Store
         parsed = []
@@ -51,3 +64,23 @@ class JSCode:
 
     def __call__(self, *args: Any):
         return self.call(*args)
+
+
+
+def Not(code: JSCode):
+    return JSCode(f"!{code}")
+
+def Set(code: JSCode, other: Any):
+    return JSCode(f"{code.raw} = {other}")
+
+def Eq(code: JSCode, other: Any):
+    return JSCode(f"{code.raw} == {other}")
+
+def Ne(code: JSCode, other: Any):
+    return JSCode(f"{code.raw} != {other}")
+
+def Gt(code: JSCode, other: Any):
+    return JSCode(f"{code.raw} > {other}")
+
+def Lt(code: JSCode, other: Any):
+    return JSCode(f"{code.raw} < {other}")

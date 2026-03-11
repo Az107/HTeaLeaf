@@ -15,9 +15,10 @@ from TeaLeaf.Html.Elements import (
     submit,
     textInput,
 )
-from TeaLeaf.Magic.Common import JSCode, Not
 from TeaLeaf.Magic.HelperMidleware import enable_reactivity
+from TeaLeaf.Magic.JSCode import JSCode, Not
 from TeaLeaf.Magic.LocalState import use_state
+from TeaLeaf.Magic.py2js import alert, document, js, window
 from TeaLeaf.Magic.Store import AuthStore, Store, SuperStore
 from TeaLeaf.Server.Server import HttpRequest, Server, Session
 from TeaLeaf.utils import redirect
@@ -156,25 +157,23 @@ def home(session, req: HttpRequest):
 
     modal_state = use_state(True)
     age = use_state(0)
-    _document = JSCode("document")
-    window = JSCode("window")
-    addTodoIfNotEmpty = JSCode("addTodoIfNotEmpty")
+
+    @js
+    def addTodoIfNotEmpty(inputId, store):
+        val = document.getElementById(inputId).value
+        if (val.trim() != ""):
+            store.set("todo", {"done": False, "value": val})
+            document.getElementById(inputId).value = ""
+        else:
+            alert("empty task")
+
+
     web = html(
         head(
             mincss,
-            script("""
-            function addTodoIfNotEmpty(inputId, store) {
-                let val = document.getElementById(inputId).value;
-                if (val.trim() !== "") {
-                    store.set("todo", {"done": false, "value": val});
-                    document.getElementById(inputId).value = "";
-                } else {
-                    alert("empty task")
-                }
-            }
-            """),
-            age.new(),
-            modal_state.new()
+            script(addTodoIfNotEmpty),
+            age.new(), #TODO: remove, should be injected
+            modal_state.new() #TODO: remove, should be injected
         ),
         body(
             header(

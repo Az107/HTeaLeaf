@@ -1,7 +1,11 @@
 import re
 import sys
+from types import FunctionType
 from typing import Any, List, Union
 
+from TeaLeaf.Magic.py2js import JSFunction, js
+
+from ..Magic.JSCode import JSCode
 from .Component import Component, ComponentMeta
 
 
@@ -20,22 +24,21 @@ class link(Component, metaclass=ComponentMeta):
 
 
 class script(Component):
-    def __init__(self, *childs: Union[str, List[Any], "Component"] ,src=None):
-        from .JSCode import JSCode
-        super().__init__("script", *childs)
+    def __init__(self, *childs: Union[str, List[Any], "Component", JSFunction] ,src=None):
+        parsed_childs: Union[str, List[Any], "Component"] = []
+        for child in childs:
+            if type(child) is FunctionType:
+                parsed_childs.append(js(child))
+            elif type(child) is JSFunction:
+                parsed_childs.append(child)
+            else:
+                parsed_childs.append(child)
+        super().__init__("script", *parsed_childs)
         self.unsafe = True
         if src is not None:
             self.attr(src=src)
             self.children = [""]
-        else:
-            funcs = []
-            for child in childs:
-                if type(child) is str:
-                    pattern = r'\bfunction\s+([A-Za-z_$][\w$]*)\s*\('
-                    funcs += re.findall(pattern, child)
-            main_globals = sys.modules["__main__"].__dict__
-            for func in funcs:
-                main_globals[func] = JSCode(func)
+        # else:
 
 
 
@@ -117,3 +120,9 @@ class form(Component):
     def method(self, method):
         self.attr(method=method)
         return self
+
+def tl_if(condition: JSCode | str | bool, *childs):
+    if isinstance(condition, str):
+        condition = JSCode(condition)
+
+    return div(*childs).attr(style=f"display: {condition};")
