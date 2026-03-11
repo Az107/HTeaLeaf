@@ -1,41 +1,46 @@
 class LocalState {
   constructor(init_val) {
-    this.id = "";
+    this.id = id; //TODO: add to constructor args
     this.val = init_val;
-    this._nodes = [];
-    document.addEventListener("DOMContentLoaded", () => {
-      this._render(null, init_val);
-    });
+    this._nodes = []; // { node, template }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => this._collect());
+    } else {
+      this._collect();
+    }
   }
 
   set(data) {
-    const old = this.val;
     this.val = data;
-    this._render(old, this.val);
+    this._render();
   }
 
   get() {
     return this.val;
   }
 
-  _render(old, val) {
-    if (this._nodes.length === 0) {
-      const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-      );
-      let node;
-      const tag = `{{${this.id}}}`;
-      while ((node = walker.nextNode())) {
-        if (node.nodeValue.includes(tag)) {
-          this._nodes.push(node);
-          node.nodeValue = node.nodeValue.replaceAll(tag, val);
-        }
+  _collect() {
+    const tag = `{{${this.id}}}`;
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+    );
+    let node;
+
+    while ((node = walker.nextNode())) {
+      if (node.nodeValue.includes(tag)) {
+        // Guardamos el template original para reemplazos futuros
+        this._nodes.push({ node, template: node.nodeValue });
+        node.nodeValue = node.nodeValue.replaceAll(tag, this.val);
       }
-    } else {
-      for (let node of this._nodes) {
-        node.nodeValue = node.nodeValue.replaceAll(old, val);
-      }
+    }
+  }
+
+  _render() {
+    const tag = `{{${this.id}}}`;
+    for (let { node, template } of this._nodes) {
+      node.nodeValue = template.replaceAll(tag, this.val);
     }
   }
 }
