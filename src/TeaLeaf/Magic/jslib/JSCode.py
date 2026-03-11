@@ -20,6 +20,9 @@ class JSCode:
     def __invert__(self):
         return JSCode(f"!{self.raw}")
 
+    def __setattr__(self, name: str, value: Any, /) -> None:
+        pass
+
     def __getattr__(self, name: str):
         return JSCode(f"{self.raw}.{name}")
 
@@ -83,6 +86,7 @@ class JSFunction():
 
     def __call__(self, *args):
         return JSCode(f"{self.name}")(*args)
+
 
 def js(fn: FunctionType):
     src = textwrap.dedent(inspect.getsource(fn))
