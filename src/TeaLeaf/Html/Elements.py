@@ -1,11 +1,8 @@
-import re
-import sys
 from types import FunctionType
 from typing import Any, List, Union
 
-from TeaLeaf.Magic.py2js import JSFunction, js
+from TeaLeaf.Magic.jslib import JSCode, JSFunction, js
 
-from ..Magic.JSCode import JSCode
 from .Component import Component, ComponentMeta
 
 

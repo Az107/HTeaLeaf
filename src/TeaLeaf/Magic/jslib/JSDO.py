@@ -3,7 +3,8 @@ import re
 from typing import Any
 from uuid import uuid4
 
-from ..Html.Elements import script
+from TeaLeaf.Html.Elements import script
+
 from .JSCode import JSCode
 
 
@@ -54,8 +55,3 @@ class JSDO:
 
     def delete(self, *args):
         return self.__format_js__("delete", *args)
-
-
-
-def Dom(query):
-    return JSCode(f"""document.querySelector(`{query}`)""")

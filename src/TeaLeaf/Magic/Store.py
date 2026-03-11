@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from ..Html.Component import Component
 from ..Html.Elements import div
-from ..Magic.Common import JSDO
+from ..Magic.jslib.JSDO import JSDO
 from ..Server.Server import HttpRequest, Server, ServerEvent, Session
 
 

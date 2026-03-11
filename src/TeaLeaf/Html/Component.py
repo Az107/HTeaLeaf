@@ -2,7 +2,7 @@ import hashlib
 import json
 from typing import Any, List, Union
 
-from ..Magic.JSCode import JSCode
+from ..Magic.jslib.JSCode import JSCode
 
 
 class Component:

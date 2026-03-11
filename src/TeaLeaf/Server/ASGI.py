@@ -23,8 +23,6 @@ class Scope:
 
 
 
-
-
 # dict struct
 # recive event:
 #     type: str

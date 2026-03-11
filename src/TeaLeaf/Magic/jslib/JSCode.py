@@ -1,5 +1,10 @@
+import inspect
 import json
+import textwrap
+from types import FunctionType
 from typing import Any
+
+from .py2js import transpile
 
 
 class JSCode:
@@ -44,7 +49,7 @@ class JSCode:
 
 
     def call(self, *args):
-        from ..Magic.Store import AuthStore, Store
+        from ..Store import AuthStore, Store
         parsed = []
         for arg in args:
             if isinstance(arg, JSCode):
@@ -55,7 +60,7 @@ class JSCode:
                 arg = str(arg).lower()
             if isinstance(arg, Store) or isinstance(arg, AuthStore):
                 arg = str(arg.do())
-            print(arg)
+
             parsed.append(arg)
 
         payload = ",".join(parsed)
@@ -67,20 +72,21 @@ class JSCode:
 
 
 
-def Not(code: JSCode):
-    return JSCode(f"!{code}")
+class JSFunction():
+    def __init__(self,name: str, raw: str):
+        super().__init__()
+        self.name = name
+        self.raw = raw
 
-def Set(code: JSCode, other: Any):
-    return JSCode(f"{code.raw} = {other}")
+    def __str__(self):
+        return self.raw
 
-def Eq(code: JSCode, other: Any):
-    return JSCode(f"{code.raw} == {other}")
+    def __call__(self, *args):
+        return JSCode(f"{self.name}")(*args)
 
-def Ne(code: JSCode, other: Any):
-    return JSCode(f"{code.raw} != {other}")
-
-def Gt(code: JSCode, other: Any):
-    return JSCode(f"{code.raw} > {other}")
-
-def Lt(code: JSCode, other: Any):
-    return JSCode(f"{code.raw} < {other}")
+def js(fn: FunctionType):
+    src = textwrap.dedent(inspect.getsource(fn))
+    lines = src.splitlines()
+    lines = [l for l in lines if not l.strip().startswith("@js")]
+    src = "\n".join(lines)
+    return JSFunction(fn.__name__, transpile(src))

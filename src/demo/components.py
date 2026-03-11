@@ -16,9 +16,9 @@ from TeaLeaf.Html.Elements import (
     textInput,
 )
 from TeaLeaf.Magic.HelperMidleware import enable_reactivity
-from TeaLeaf.Magic.JSCode import JSCode, Not
+from TeaLeaf.Magic.jslib import js
+from TeaLeaf.Magic.jslib.common import Not, alert, document, window
 from TeaLeaf.Magic.LocalState import use_state
-from TeaLeaf.Magic.py2js import alert, document, js, window
 from TeaLeaf.Magic.Store import AuthStore, Store, SuperStore
 from TeaLeaf.Server.Server import HttpRequest, Server, Session
 from TeaLeaf.utils import redirect
@@ -145,6 +145,8 @@ def logout(session):
     if session.has("userName"):
         del session["userName"]
     return redirect("/login")
+
+
 
 
 def home(session, req: HttpRequest):

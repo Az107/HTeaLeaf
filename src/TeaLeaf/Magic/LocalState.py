@@ -1,4 +1,4 @@
-from ..Magic.Common import JSDO
+from ..Magic.jslib.JSDO import JSDO
 
 # class localState():
 #     def __init__(self, init_state):
