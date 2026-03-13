@@ -21,10 +21,19 @@ class JSCode:
         return JSCode(f"!{self.raw}")
 
     def __setattr__(self, name: str, value: Any, /) -> None:
-        pass
+        if name == "raw":
+            object.__setattr__(self, name, value)
+        else:
+            pass
 
     def __getattr__(self, name: str):
         return JSCode(f"{self.raw}.{name}")
+
+    def __setitem__(self, key, value):
+        return JSCode(f"{self.raw}[{key}] = {value}")
+
+    def __delitem__(self, key):
+        return JSCode(f"delete {self.raw}[{key}]")
 
     def __add__(self, other):
         return JSCode(f"({self.raw} + {other})")
@@ -56,13 +65,15 @@ class JSCode:
         parsed = []
         for arg in args:
             if isinstance(arg, JSCode):
-                arg = str(arg)
-            if isinstance(arg, str):
+                arg = arg.raw
+            elif isinstance(arg, str):
                 arg = json.dumps(arg)
-            if isinstance(arg, bool):
+            elif isinstance(arg, bool):
                 arg = str(arg).lower()
-            if isinstance(arg, Store) or isinstance(arg, AuthStore):
+            elif isinstance(arg, Store) or isinstance(arg, AuthStore):
                 arg = str(arg.do())
+            else:
+                arg = str(arg)
 
             parsed.append(arg)
 

@@ -51,6 +51,9 @@ class SuperStore:
         if isinstance(store, AuthStore):
             store = store.auth(session)
 
+        if store is None:
+            return "404 Not Found", "Not found"
+
 
         if req.method == "GET":
             return json.dumps(store.read(path))
@@ -74,8 +77,8 @@ class SuperStore:
 
 
 class Store:
-    def __init__(self, default={}, subscribe=True):
-        self._id = str(uuid4())
+    def __init__(self, default={}, subscribe=True, id = str(uuid4())):
+        self._id = id
         self.data = copy.copy(default)
         self.do = JSDO("Store", self._id)
         if subscribe:
@@ -172,5 +175,5 @@ class AuthStore():
     def auth(self, session: Session) -> Store:
         key = self.auth_func(session)
         if key not in self.data:
-            self.data[key] = Store(default=copy.deepcopy(self.default),subscribe=False)
+            self.data[key] = Store(default=copy.deepcopy(self.default),subscribe=False, id=self._id)
         return self.data[key]

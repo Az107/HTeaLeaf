@@ -1,3 +1,10 @@
+import hashlib
+import inspect
+import json
+
+from TeaLeaf.Html.Elements import script
+
+from ..Magic.jslib.JSCode import JSCode
 from ..Magic.jslib.JSDO import JSDO
 
 # class localState():
@@ -18,4 +25,14 @@ from ..Magic.jslib.JSDO import JSDO
 
 
 def use_state(init_state):
-    return JSDO("LocalState",init_state)
+    frame = inspect.stack()[1]
+    site = f"{frame.filename}:{frame.lineno}"
+    raw = f"{site}:{json.dumps(init_state, sort_keys=True)}"
+    id = hashlib.md5(raw.encode()).hexdigest()[:12]
+    name = f"localstate_{id}"
+
+    def new():
+        return script(f"const {name} = new LocalState({json.dumps(init_state, sort_keys=True)},\"{name}\");")
+
+
+    return new, JSCode(name)

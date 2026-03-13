@@ -1,9 +1,11 @@
+const states = [];
+
 class LocalState {
-  constructor(init_val) {
+  constructor(init_val, id) {
     this.id = id; //TODO: add to constructor args
     this.val = init_val;
     this._nodes = []; // { node, template }
-
+    states.push(this);
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => this._collect());
     } else {
@@ -95,6 +97,10 @@ async function fetch_front() {
     let serverHtml = await result.text();
     let vdom = new DOMParser().parseFromString(serverHtml, "text/html");
     authority_zero(vdom.body, document.body);
+    for (let state of states) {
+      state._collect();
+      state._render();
+    }
   }
 }
 

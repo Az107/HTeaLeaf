@@ -1,7 +1,6 @@
 
+from demo.components import init
 from TeaLeaf.Server.WSGI import WSGI
-
-from .components import init
 
 app = WSGI()
 

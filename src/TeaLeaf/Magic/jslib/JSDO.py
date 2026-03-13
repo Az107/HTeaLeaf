@@ -1,3 +1,5 @@
+import hashlib
+import inspect
 import json
 import re
 from typing import Any
@@ -10,8 +12,12 @@ from .JSCode import JSCode
 
 class JSDO:
     def __init__(self, object_name: str, arg: Any):
-        # js_file = os.path.dirname(__file__) + "/Store.js"
-        self.obj_name = f"{object_name.lower()}_{str(uuid4())[:5]}"
+        frame = inspect.stack()[1]
+        site = f"{frame.filename}:{frame.lineno}"
+
+        raw = f"{object_name}:{site}:{json.dumps(arg, sort_keys=True)}"
+        id = hashlib.md5(raw.encode()).hexdigest()[:12]
+        self.obj_name = f"{object_name.lower()}_{id}"
         self.store_js = f"const {self.obj_name} = new {object_name}({json.dumps(arg)}); {self.obj_name}.id = '{self.obj_name}';"
 
 

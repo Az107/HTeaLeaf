@@ -101,6 +101,18 @@ class textInput(Component):
     def __init__(self, *childs):
         super().__init__("input", *childs)
 
+class select(Component):
+    def __init__(self, items: List[str]):
+        super().__init__("select")
+        for item in items:
+            self.append(option(item))
+
+class option(Component):
+    def __init__(self, value):
+        super().__init__("option", value)
+        self.attr(value=value)
+
+
 class submit(Component):
     def __init__(self, *childs):
         super().__init__("input", *childs)

@@ -157,8 +157,9 @@ def home(session, req: HttpRequest):
         return redirect("/login")
 
 
-    modal_state = use_state(True)
-    age = use_state(0)
+    modal_state_new, modal_state = use_state(True)
+    age_new, age = use_state(0)
+    localCounter_new, localCounter = use_state(0)
 
     @js
     def addTodoIfNotEmpty(inputId, store):
@@ -174,22 +175,23 @@ def home(session, req: HttpRequest):
         head(
             mincss,
             script(addTodoIfNotEmpty),
-            age.new(), #TODO: remove, should be injected
-            modal_state.new() #TODO: remove, should be injected
+            age_new(), #TODO: remove, should be injected
+            modal_state_new(), #TODO: remove, should be injected
+            localCounter_new(),
         ),
         body(
             header(
                 div(
                     h1("TeaLeaf!").style(color="green"),
-                    button(f"Welcome {session["userName"]}").attr(onclick=window.location.replace("/logout")),
+                    button(f"Welcome {session["userName"]} {{{{{age}}}}}",).attr(onclick=window.location.replace("/logout")),
                 ).row()
             ),
             button("toggle modal").attr(onclick=modal_state.set(Not(modal_state.get()))),
-            div("Esto es modal: ", modal_state()).classes("card").row().attr(hidden=modal_state.get()),
+            div("Esto es modal: ", modal_state).classes("card").row().attr(hidden=modal_state.get()),
             div(
-                button("-").attr(onclick=age.set(age.get() - 1)),
-                age(),
-                button("+").attr(onclick=age.set(age.get() + 1))
+                button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
+                f"{{{{{localCounter}}}}}",
+                button("+").attr(onclick=localCounter.set(localCounter.get() + 1))
             ).classes("card").row(),
             div(
                 contar(),
