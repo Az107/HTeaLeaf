@@ -1,7 +1,7 @@
 [project]
-name = "TeaLeaf"
-version = "0.2.0"
-description = "Add your description here"
+name = "HTeaLeaf"
+version = "0.3.0"
+description = "Declarative SSR Framework"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -14,4 +14,4 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
-"TeaLeaf.Server" = ['*.js']
+"HTeaLeaf.Server" = ['*.js']

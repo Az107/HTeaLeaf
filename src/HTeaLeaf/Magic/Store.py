@@ -3,9 +3,10 @@ import json
 from typing import Any
 from uuid import uuid4
 
+from HTeaLeaf.Magic.jslib.JSCode import JSCode
+
 from ..Html.Component import Component
-from ..Html.Elements import div
-from ..Magic.jslib.JSDO import JSDO
+from ..Html.Elements import div, script
 from ..Server.Server import HttpRequest, Server, ServerEvent, Session
 
 
@@ -23,7 +24,7 @@ class SuperStore:
         if isinstance(res_body, Component):
             for store_id in self.stores:
                 store = self.stores[store_id]
-                res_body.append(store.do.new())
+                res_body.append(script(f"const {store.do} = new Store(\"{store._id}\");"))
 
     def __init__(self, server: Server | None = None):
         if not self._initialized:
@@ -80,7 +81,7 @@ class Store:
     def __init__(self, default={}, subscribe=True, id = str(uuid4())):
         self._id = id
         self.data = copy.copy(default)
-        self.do = JSDO("Store", self._id)
+        self.do = JSCode(f"store_{self._id[:8]}")
         if subscribe:
             SuperStore().add(self._id, self)
 
@@ -169,7 +170,7 @@ class AuthStore():
         self.default = default
         self.data: dict[str, Store] = {}
         self.auth_func = auth
-        self.do = JSDO("Store", self._id)
+        self.do = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
     def auth(self, session: Session) -> Store:

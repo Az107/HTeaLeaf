@@ -96,6 +96,9 @@ class JSFunction():
         return self.raw
 
     def __call__(self, *args):
+        for arg in args:
+            if isinstance(arg, JSCode):
+                arg = arg.raw
         return JSCode(f"{self.name}")(*args)
 
 

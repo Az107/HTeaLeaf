@@ -94,7 +94,10 @@ class Component:
 
         for k in attr:
             # if type(attr[k]) is str:
-            self.attributes[k] = str(attr[k])
+            value = attr[k]
+            # if isinstance(value, JSCode):
+            #     value = f"{{{{{str(value)}}}}}"
+            self.attributes[k] = value
             # elif type(attr[k]) is FunctionType:
             #     py_f = inspect.getsource(attr[k])
             #     self.attributes[k] = f"""() => pyodide.runPython(`{py_f}`)"""

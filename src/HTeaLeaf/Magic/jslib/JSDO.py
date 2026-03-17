@@ -5,7 +5,7 @@ import re
 from typing import Any
 from uuid import uuid4
 
-from TeaLeaf.Html.Elements import script
+from HTeaLeaf.Html.Elements import script
 
 from .JSCode import JSCode
 

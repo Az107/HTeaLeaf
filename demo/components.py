@@ -1,4 +1,4 @@
-from TeaLeaf.Html.Elements import (
+from HTeaLeaf.Html.Elements import (
     body,
     button,
     checkbox,
@@ -15,13 +15,13 @@ from TeaLeaf.Html.Elements import (
     submit,
     textInput,
 )
-from TeaLeaf.Magic.HelperMidleware import enable_reactivity
-from TeaLeaf.Magic.jslib import js
-from TeaLeaf.Magic.jslib.common import Not, alert, document, window
-from TeaLeaf.Magic.LocalState import use_state
-from TeaLeaf.Magic.Store import AuthStore, Store, SuperStore
-from TeaLeaf.Server.Server import HttpRequest, Server, Session
-from TeaLeaf.utils import redirect
+from HTeaLeaf.Magic.HelperMidleware import enable_reactivity
+from HTeaLeaf.Magic.jslib import js
+from HTeaLeaf.Magic.jslib.common import Not, alert, document, window
+from HTeaLeaf.Magic.LocalState import use_state
+from HTeaLeaf.Magic.Store import AuthStore, Store, SuperStore
+from HTeaLeaf.Server.Server import HttpRequest, Server, Session
+from HTeaLeaf.utils import redirect
 
 
 def auth_session(session: Session):
@@ -170,27 +170,36 @@ def home(session, req: HttpRequest):
         else:
             alert("empty task")
 
+    @js
+    def toggleModal(state):
+        state.set(not state.get())
+        new_display = "none"
+        if state.get():
+            new_display = "block"
+        document.getElementById("modal").style.display = new_display
+
 
     web = html(
         head(
             mincss,
             script(addTodoIfNotEmpty),
+            script(toggleModal),
             age_new(), #TODO: remove, should be injected
             modal_state_new(), #TODO: remove, should be injected
-            localCounter_new(),
+            localCounter_new(), #TODO: remove, should be injected
         ),
         body(
             header(
                 div(
-                    h1("TeaLeaf!").style(color="green"),
+                    h1("HTeaLeaf!").style(color="green"),
                     button(f"Welcome {session["userName"]} {{{{{age}}}}}",).attr(onclick=window.location.replace("/logout")),
                 ).row()
             ),
-            button("toggle modal").attr(onclick=modal_state.set(Not(modal_state.get()))),
-            div("Esto es modal: ", modal_state).classes("card").row().attr(hidden=modal_state.get()),
+            button("toggle modal").attr(onclick=toggleModal(modal_state)),
+            div("Esto es modal: ", modal_state).id("modal").classes("card").row(),
             div(
                 button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
-                f"{{{{{localCounter}}}}}",
+                localCounter,
                 button("+").attr(onclick=localCounter.set(localCounter.get() + 1))
             ).classes("card").row(),
             div(

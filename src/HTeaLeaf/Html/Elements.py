@@ -1,7 +1,7 @@
 from types import FunctionType
 from typing import Any, List, Union
 
-from TeaLeaf.Magic.jslib import JSCode, JSFunction, js
+from HTeaLeaf.Magic.jslib import JSCode, JSFunction, js
 
 from .Component import Component, ComponentMeta
 

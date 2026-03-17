@@ -23,6 +23,30 @@ class LocalState {
   }
 
   _collect() {
+    this._collectText();
+    this._collectAttr();
+  }
+
+  _collectAttr() {
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_ATTRIBUTE,
+    );
+    let node;
+
+    while ((node = walker.nextNode())) {
+      const attrs = node.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const attr = attrs[i];
+        if (attr.value.includes(`${this.id}`)) {
+          this._nodes.push({ node, attr, template: attr.value });
+          attr.value = attr.value.replaceAll(`${this.id}`, this.val);
+        }
+      }
+    }
+  }
+
+  _collectText() {
     const tag = `{{${this.id}}}`;
     const walker = document.createTreeWalker(
       document.body,
@@ -40,9 +64,12 @@ class LocalState {
   }
 
   _render() {
-    const tag = `{{${this.id}}}`;
-    for (let { node, template } of this._nodes) {
-      node.nodeValue = template.replaceAll(tag, this.val);
+    for (let { node, attr, template } of this._nodes) {
+      if (attr) {
+        attr.value = template.replaceAll(`{{${this.id}}}`, this.val);
+      } else {
+        node.nodeValue = template.replaceAll(`{{${this.id}}}`, this.val);
+      }
     }
   }
 }

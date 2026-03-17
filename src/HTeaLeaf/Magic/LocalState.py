@@ -2,7 +2,7 @@ import hashlib
 import inspect
 import json
 
-from TeaLeaf.Html.Elements import script
+from HTeaLeaf.Html.Elements import script
 
 from ..Magic.jslib.JSCode import JSCode
 from ..Magic.jslib.JSDO import JSDO

@@ -161,6 +161,7 @@ class PythonToJS(ast.NodeVisitor):
     # -----------------------------------------------------------------------
 
     def visit_Name(self, node: ast.Name) -> str:
+        print(f"node name: {node}")
         return node.id
 
     def visit_Attribute(self, node: ast.Attribute) -> str:

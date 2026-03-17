@@ -1,6 +1,6 @@
-# 🍃 TeaLeaf
+# 🍃 HTeaLeaf
 
-**TeaLeaf** is a *declarative web framework for Python* —
+**HTeaLeaf** is a *declarative web framework for Python* —
 it lets you build dynamic, reactive web apps using **pure Python**,
 without writing templates or frontend JavaScript manually.
 
@@ -8,20 +8,20 @@ without writing templates or frontend JavaScript manually.
 
 ## ✨ Overview
 
-TeaLeaf merges ideas from modern frontend frameworks like React, Svelte, and SolidJS
+HTeaLeaf merges ideas from modern frontend frameworks like React, Svelte, and SolidJS
 with the simplicity of traditional Python web servers.
 
 You declare HTML directly in Python, manage reactive state via `Store` objects,
-and TeaLeaf takes care of keeping everything in sync — automatically.
+and HTeaLeaf takes care of keeping everything in sync — automatically.
 
 ---
 
 ## 🚀 Quick Example
 
 ```python
-from TeaLeaf.Server.WSGI import WSGI
-from TeaLeaf.Magic.Store import Store, SuperStore
-from TeaLeaf.Html.Elements import div, h3, button
+from HTeaLeaf.Server.WSGI import WSGI
+from HTeaLeaf.Magic.Store import Store, SuperStore
+from HTeaLeaf.Html.Elements import div, h3, button
 
 # Create the server
 app = WSGI()
@@ -73,14 +73,14 @@ you’ll see a fully reactive counter built with only Python
 
 Documentation
 
-Full documentation is available in the [Wiki](https://github.com/Az107/TeaLeaf/wiki/Welcome-to-the-TeaLeaf!)
+Full documentation is available in the [Wiki](https://github.com/Az107/HTeaLeaf/wiki/Welcome-to-the-HTeaLeaf!)
 
 ## Status
 
-TeaLeaf is currently in alpha.
+HTeaLeaf is currently in alpha.
 It’s stable enough for experimentation and small demos,
 but the public API might still change before beta.
 
 ## License
 
-MIT License © 2025 — TeaLeaf Framework Made with 🍃 and Python.
+MIT License © 2025 — HTeaLeaf Framework Made with 🍃 and Python.
