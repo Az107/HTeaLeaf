@@ -5,7 +5,7 @@ import json
 from HTeaLeaf.Html.Elements import script
 
 from ..Magic.jslib.JSCode import JSCode
-from ..Magic.jslib.JSDO import JSDO
+from .RenderContext import get_render_ctx
 
 # class localState():
 #     def __init__(self, init_state):
@@ -23,7 +23,6 @@ from ..Magic.jslib.JSDO import JSDO
 #         return self.do.set(data)
 
 
-
 def use_state(init_state):
     frame = inspect.stack()[1]
     site = f"{frame.filename}:{frame.lineno}"
@@ -31,8 +30,10 @@ def use_state(init_state):
     id = hashlib.md5(raw.encode()).hexdigest()[:12]
     name = f"localstate_{id}"
 
-    def new():
-        return script(f"const {name} = new LocalState({json.dumps(init_state, sort_keys=True)},\"{name}\");")
+    initializer = f'const {name} = new LocalState({json.dumps(init_state, sort_keys=True)},"{name}");'
 
+    ctx = get_render_ctx()
+    if ctx:
+        ctx.register_state(initializer)
 
-    return new, JSCode(name)
+    return JSCode(name)

@@ -59,9 +59,9 @@ class JSCode:
     def lt(self, other):
         return JSCode(f"({self.raw} < {other})")
 
-
     def call(self, *args):
         from ..Store import AuthStore, Store
+
         parsed = []
         for arg in args:
             if isinstance(arg, JSCode):
@@ -70,8 +70,8 @@ class JSCode:
                 arg = json.dumps(arg)
             elif isinstance(arg, bool):
                 arg = str(arg).lower()
-            elif isinstance(arg, Store) or isinstance(arg, AuthStore):
-                arg = str(arg.do())
+            elif hasattr(arg, "_js"):
+                arg = str(arg._js())
             else:
                 arg = str(arg)
 
@@ -80,26 +80,31 @@ class JSCode:
         payload = ",".join(parsed)
         return JSCode(f"{self.raw}({payload})")
 
-
     def __call__(self, *args: Any):
         return self.call(*args)
 
 
-
-class JSFunction():
-    def __init__(self,name: str, raw: str):
+class JSFunction:
+    def __init__(self, name: str, raw: str):
         super().__init__()
         self.name = name
         self.raw = raw
+        # ctx = get_render_ctx()
+        # if ctx:
+        #     ctx.register_state(raw)
 
     def __str__(self):
         return self.raw
 
     def __call__(self, *args):
+        processed = []
         for arg in args:
             if isinstance(arg, JSCode):
-                arg = arg.raw
-        return JSCode(f"{self.name}")(*args)
+                arg = arg
+            elif hasattr(arg, "_js"):
+                arg = arg._js
+            processed.append(arg)
+        return JSCode(f"{self.name}")(*processed)
 
 
 def js(fn: FunctionType):

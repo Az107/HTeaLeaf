@@ -17,7 +17,7 @@ from HTeaLeaf.Html.Elements import (
 )
 from HTeaLeaf.Magic.HelperMidleware import enable_reactivity
 from HTeaLeaf.Magic.jslib import js
-from HTeaLeaf.Magic.jslib.common import Not, alert, document, window
+from HTeaLeaf.Magic.jslib.common import alert, document, window
 from HTeaLeaf.Magic.LocalState import use_state
 from HTeaLeaf.Magic.Store import AuthStore, Store, SuperStore
 from HTeaLeaf.Server.Server import HttpRequest, Server, Session
@@ -32,6 +32,7 @@ def auth_session(session: Session):
 
 cstore: Store | None = None
 todoStore: AuthStore | None = None
+
 
 def init(app: Server):
     global cstore
@@ -51,9 +52,11 @@ def init(app: Server):
     app.add_path("/", home)
 
 
+mincss_url = (
+    "https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
+)
+mincss = link().attr(rel="stylesheet", href=mincss_url)
 
-mincss_url = "https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
-mincss = link().attr(rel="stylesheet",href=mincss_url)
 
 def health(req: HttpRequest):
     return {
@@ -64,17 +67,21 @@ def health(req: HttpRequest):
     }
 
 
-
 def contar():
     if cstore is None:
         return None
 
     return div(
-        button("-").attr(onclick=cstore.do.update("counter",cstore.read("counter") - 1)),
-            h3( cstore.react("counter")),
-        button("+").attr(onclick=cstore.do.update("counter", cstore.read("counter") + 1)),
-        ).row()
-
+        button("-").attr(
+            onclick=cstore._js.update(
+                "counter", cstore.read("counter") - 1
+            )  # TODO: remplace _js
+        ),
+        h3(cstore.react("counter")),
+        button("+").attr(
+            onclick=cstore._js.update("counter", cstore.read("counter") + 1)
+        ),
+    ).row()
 
 
 def saluda(name):
@@ -92,7 +99,6 @@ def LoginPage():
         .action("/login")
         .method("POST"),
     )
-
 
 
 def user(session, req: HttpRequest):
@@ -128,25 +134,25 @@ def elementoCompra(id, task):
     if todoStore is None:
         return None
 
-    return div(
-        checkbox(checked=task["done"]).attr(
-            onchange=todoStore.do.update(
-                f"todo/{id}/done", not task["done"]
-            )
-        ),
-        h2(task["value"]).style(text_overflow= "ellipsis"),
-        button("x").classes("secondary").attr(onclick=todoStore.do.delete(f"todo/{id}"))
-    ).row().classes("card")
-
-
+    return (
+        div(
+            checkbox(checked=task["done"]).attr(
+                onchange=todoStore._js.update(f"todo/{id}/done", not task["done"])
+            ),
+            h2(task["value"]).style(text_overflow="ellipsis"),
+            button("x")
+            .classes("secondary")
+            .attr(onclick=todoStore._js.delete(f"todo/{id}")),
+        )
+        .row()
+        .classes("card")
+    )
 
 
 def logout(session):
     if session.has("userName"):
         del session["userName"]
     return redirect("/login")
-
-
 
 
 def home(session, req: HttpRequest):
@@ -156,15 +162,14 @@ def home(session, req: HttpRequest):
     if not session.has("userName"):
         return redirect("/login")
 
-
-    modal_state_new, modal_state = use_state(True)
-    age_new, age = use_state(0)
-    localCounter_new, localCounter = use_state(0)
+    modal_state = use_state(True)
+    age = use_state(0)
+    localCounter = use_state(0)
 
     @js
     def addTodoIfNotEmpty(inputId, store):
         val = document.getElementById(inputId).value
-        if (val.trim() != ""):
+        if val.trim() != "":
             store.set("todo", {"done": False, "value": val})
             document.getElementById(inputId).value = ""
         else:
@@ -178,21 +183,19 @@ def home(session, req: HttpRequest):
             new_display = "block"
         document.getElementById("modal").style.display = new_display
 
-
     web = html(
         head(
             mincss,
             script(addTodoIfNotEmpty),
             script(toggleModal),
-            age_new(), #TODO: remove, should be injected
-            modal_state_new(), #TODO: remove, should be injected
-            localCounter_new(), #TODO: remove, should be injected
         ),
         body(
             header(
                 div(
                     h1("HTeaLeaf!").style(color="green"),
-                    button(f"Welcome {session["userName"]} {{{{{age}}}}}",).attr(onclick=window.location.replace("/logout")),
+                    button(
+                        f"Welcome {session['userName']} {{{{{age}}}}}",
+                    ).attr(onclick=window.location.replace("/logout")),
                 ).row()
             ),
             button("toggle modal").attr(onclick=toggleModal(modal_state)),
@@ -200,22 +203,25 @@ def home(session, req: HttpRequest):
             div(
                 button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
                 localCounter,
-                button("+").attr(onclick=localCounter.set(localCounter.get() + 1))
-            ).classes("card").row(),
+                button("+").attr(onclick=localCounter.set(localCounter.get() + 1)),
+            )
+            .classes("card")
+            .row(),
             div(
                 contar(),
-                div([elementoCompra(idx, c) for idx,c in enumerate(todoStore.auth(session).read("todo"))]).style(
-                    padding="20px",
-                    height="200px",
-                    overflow_y="scroll"
-                ),
+                div(
+                    [
+                        elementoCompra(idx, c)
+                        for idx, c in enumerate(todoStore.auth(session).read("todo"))
+                    ]
+                ).style(padding="20px", height="200px", overflow_y="scroll"),
                 div(
                     textInput().id("item_compra"),
                     button("Create").attr(
-                        onclick=addTodoIfNotEmpty("item_compra",todoStore)
+                        onclick=addTodoIfNotEmpty("item_compra", todoStore)
                     ),
                 ).row(),
-            )
+            ),
         ),
     )
     return web

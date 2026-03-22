@@ -19,12 +19,13 @@ class SuperStore:
             cls._instance = super(SuperStore, cls).__new__(cls)
         return cls._instance
 
-
     def inject_stores(self, res_code, res_body, res_headers):
         if isinstance(res_body, Component):
             for store_id in self.stores:
                 store = self.stores[store_id]
-                res_body.append(script(f"const {store.do} = new Store(\"{store._id}\");"))
+                res_body.append(
+                    script(f'const {store._js} = new Store("{store._id}");')
+                )
 
     def __init__(self, server: Server | None = None):
         if not self._initialized:
@@ -42,7 +43,7 @@ class SuperStore:
     def add(self, id, store: "Store | AuthStore"):
         self.stores[id] = store
 
-    def process(self,session: Session, req: HttpRequest, api_id):
+    def process(self, session: Session, req: HttpRequest, api_id):
         path = req.path.removeprefix(f"/api/_store/{api_id}/")
 
         store = self.stores.get(api_id)
@@ -54,7 +55,6 @@ class SuperStore:
 
         if store is None:
             return "404 Not Found", "Not found"
-
 
         if req.method == "GET":
             return json.dumps(store.read(path))
@@ -76,15 +76,13 @@ class SuperStore:
             return "404 Not Found", "Not found"
 
 
-
 class Store:
-    def __init__(self, default={}, subscribe=True, id = str(uuid4())):
+    def __init__(self, default={}, subscribe=True, id=str(uuid4())):
         self._id = id
         self.data = copy.copy(default)
-        self.do = JSCode(f"store_{self._id[:8]}")
+        self._js = JSCode(f"store_{self._id[:8]}")
         if subscribe:
             SuperStore().add(self._id, self)
-
 
     def __get_pointer__(self, path):
         pointer = self.data
@@ -118,7 +116,6 @@ class Store:
             else:
                 return False
 
-
     def update(self, path, data):
         path = path.split("/") if path != "" else []
 
@@ -130,14 +127,12 @@ class Store:
 
         return data
 
-
     def read(self, path: str) -> Any:
         path_list = path.split("/") if path != "" else []
         pointer = self.__get_pointer__(path_list)
         return pointer
 
-
-    def react(self,path) -> Component:
+    def react(self, path) -> Component:
         return div(self.read(path)).classes(f"{self._id}{id}_react")
 
     def create(self, path: str, data):
@@ -164,17 +159,19 @@ class Store:
         return parent
 
 
-class AuthStore():
+class AuthStore:
     def __init__(self, auth, default={}) -> None:
         self._id = str(uuid4())
         self.default = default
         self.data: dict[str, Store] = {}
         self.auth_func = auth
-        self.do = JSCode(f"store_{self._id[:8]}")
+        self._js = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
     def auth(self, session: Session) -> Store:
         key = self.auth_func(session)
         if key not in self.data:
-            self.data[key] = Store(default=copy.deepcopy(self.default),subscribe=False, id=self._id)
+            self.data[key] = Store(
+                default=copy.deepcopy(self.default), subscribe=False, id=self._id
+            )
         return self.data[key]

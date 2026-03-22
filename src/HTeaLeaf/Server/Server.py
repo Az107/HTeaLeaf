@@ -1,4 +1,3 @@
-
 import inspect
 import json
 import os
@@ -79,7 +78,6 @@ class Session(dict):
         self[attr] = value
 
 
-
 def match_path(
     routes: dict[str, typing.Callable], path: str
 ) -> tuple[dict[str, str | object], typing.Callable] | None:
@@ -104,7 +102,7 @@ def match_path(
 def return_helper():
     try:
         helper = open(os.path.dirname(__file__) + "/helper.js")
-        return 200 , helper.read()
+        return 200, helper.read()
     except Exception as e:
         print(e)
         return "404 Not Found", "Not Found"
@@ -113,9 +111,9 @@ def return_helper():
 class ServerEvent(Enum):
     on_response = "on_response"
     on_request = "on_request"
+    on_render = "on_render"
     path_registered = "path_registered"
     new_session = "new_session"
-
 
 
 class Server:
@@ -126,7 +124,9 @@ class Server:
     def __init__(self):
         self.routes = {}
         self.sessions: dict[str, Session] = {}
-        self._hooks: dict[ServerEvent,list[Callable[..., None]]] = {event: [] for event in ServerEvent}
+        self._hooks: dict[ServerEvent, list[Callable[..., None]]] = {
+            event: [] for event in ServerEvent
+        }
         self.add_path("/_engine/helper.js", return_helper)
 
     def registry_hook(self, event: ServerEvent, callback: Callable[..., None]):
@@ -146,7 +146,9 @@ class Server:
         """Generates a unique session ID."""
         session_id = str(uuid4())
         self.sessions[session_id] = Session()
-        self.__call_hook__(ServerEvent.new_session, session_id, self.sessions[session_id])
+        self.__call_hook__(
+            ServerEvent.new_session, session_id, self.sessions[session_id]
+        )
         return session_id
 
     def route(self, path):
@@ -174,8 +176,9 @@ class Server:
             session_id = cookies["TeaLeaf-Session"]
             if self.sessions.get(session_id) is None:
                 self.sessions[session_id] = Session()
-                self.__call_hook__(ServerEvent.new_session, session_id, self.sessions[session_id])
-
+                self.__call_hook__(
+                    ServerEvent.new_session, session_id, self.sessions[session_id]
+                )
 
         return self.sessions[session_id], header_session_cookie
 
@@ -198,6 +201,7 @@ class Server:
         content_type = "text/plain"
         if isinstance(res_body, Component):
             content_type = "text/html"
+            self.__call_hook__(ServerEvent.on_render, res_body)
             res_body = res_body.render()
         elif type(res_body) is dict or type(res_body) is list:
             content_type = "application/json"
@@ -206,12 +210,13 @@ class Server:
         res_headers.add("Content-Type", content_type)
         return HttpResponse(res_code, res_headers, res_body)
 
-
     def handle_request(self, request: HttpRequest) -> HttpResponse:
         handler_and_match = match_path(self.routes, request.path)
         self.__call_hook__(ServerEvent.on_request, request)
         if handler_and_match is None:
-            return HttpResponse(HttpStatus.NotFound, [("Content-Type", "text/plain")], "Not Found")
+            return HttpResponse(
+                HttpStatus.NotFound, [("Content-Type", "text/plain")], "Not Found"
+            )
 
         params, handler = handler_and_match
         params["req"] = request
@@ -220,7 +225,6 @@ class Server:
             k.strip(): v.strip()
             for k, v in (c.split("=", 1) for c in _cookies.split(";") if "=" in c)
         }
-
 
         params["session"], session_header = self.__handle_session__(cookies)
         params["cookies"] = cookies

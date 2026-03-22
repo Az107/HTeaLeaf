@@ -1,6 +1,7 @@
 from ..Html.Component import Component
 from ..Html.Elements import script
 from ..Server.Server import Server, ServerEvent
+from .RenderContext import enable_render_context
 
 
 def enable_reactivity(server: Server):
@@ -11,3 +12,4 @@ def enable_reactivity(server: Server):
             res_body.prepend(helper_script)
 
     server.registry_hook(ServerEvent.on_response, event_handler)
+    enable_render_context(server)
