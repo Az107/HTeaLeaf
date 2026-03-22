@@ -186,8 +186,6 @@ def home(session, req: HttpRequest):
     web = html(
         head(
             mincss,
-            script(addTodoIfNotEmpty),
-            script(toggleModal),
         ),
         body(
             header(

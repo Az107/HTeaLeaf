@@ -86,12 +86,13 @@ class JSCode:
 
 class JSFunction:
     def __init__(self, name: str, raw: str):
+        from ..RenderContext import get_render_ctx
         super().__init__()
         self.name = name
         self.raw = raw
-        # ctx = get_render_ctx()
-        # if ctx:
-        #     ctx.register_state(raw)
+        ctx = get_render_ctx()
+        if ctx:
+            ctx.register_state(raw)
 
     def __str__(self):
         return self.raw
