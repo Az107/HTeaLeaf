@@ -1,5 +1,6 @@
 import inspect
 import json
+from os import name
 import textwrap
 from types import FunctionType
 from typing import Any
@@ -113,4 +114,18 @@ def js(fn: FunctionType):
     lines = src.splitlines()
     lines = [l for l in lines if not l.strip().startswith("@js")]
     src = "\n".join(lines)
-    return JSFunction(fn.__name__, transpile(src))
+    closure_vars = inspect.getclosurevars(fn)
+    all_vars = {**fn.__globals__, **closure_vars.nonlocals, **closure_vars.globals}
+    replace_map = get_jscode_ids(all_vars)
+    return JSFunction(fn.__name__, transpile(src, replace_map))
+
+
+def get_jscode_ids(all_vars) -> dict[str, str]:
+    name_map = {}
+    for var_name, var_val in all_vars.items():
+        # LocalState y Store exponen .js (JSCode), cuyo .raw es el identificador JS
+        if hasattr(var_val, 'raw'):
+            name_map[var_name] = var_val.raw
+        elif hasattr(var_val, '_js'):
+            name_map[var_name] = var_val._js.raw
+    return name_map

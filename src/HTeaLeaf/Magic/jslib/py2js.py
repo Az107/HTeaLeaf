@@ -27,8 +27,9 @@ class Scope:
 
 class PythonToJS(ast.NodeVisitor):
 
-    def __init__(self) -> None:
+    def __init__(self, replace_map: dict[str, str] = {}) -> None:
         super().__init__()
+        self.replace_map = replace_map
         self.scope = Scope()
 
     # -- Scope helpers -------------------------------------------------------
@@ -161,7 +162,8 @@ class PythonToJS(ast.NodeVisitor):
     # -----------------------------------------------------------------------
 
     def visit_Name(self, node: ast.Name) -> str:
-        print(f"node name: {node}")
+        if node.id in self.replace_map:
+            return self.replace_map[node.id]
         return node.id
 
     def visit_Attribute(self, node: ast.Attribute) -> str:
@@ -287,17 +289,15 @@ class PythonToJS(ast.NodeVisitor):
 # Entry point
 # ---------------------------------------------------------------------------
 
-def transpile(source: str) -> str:
+def transpile(source: str, replace_map: dict[str, str] = {}) -> str:
     tree = ast.parse(source)
-    visitor = PythonToJS()
+    visitor = PythonToJS(replace_map)
     parts = []
     for node in tree.body:
         result = visitor.visit(node)
         if result:
             parts.append(result)
     return "\n".join(parts)
-
-
 
 
 

@@ -167,19 +167,19 @@ def home(session, req: HttpRequest):
     localCounter = use_state(0)
 
     @js
-    def addTodoIfNotEmpty(inputId, store):
+    def addTodoIfNotEmpty(inputId):
         val = document.getElementById(inputId).value
         if val.trim() != "":
-            store.set("todo", {"done": False, "value": val})
+            todoStore.set("todo", {"done": False, "value": val})
             document.getElementById(inputId).value = ""
         else:
             alert("empty task")
 
     @js
-    def toggleModal(state):
-        state.set(not state.get())
+    def toggleModal():
+        modal_state.set(not modal_state.get())
         new_display = "none"
-        if state.get():
+        if modal_state.get():
             new_display = "block"
         document.getElementById("modal").style.display = new_display
 
@@ -196,7 +196,7 @@ def home(session, req: HttpRequest):
                     ).attr(onclick=window.location.replace("/logout")),
                 ).row()
             ),
-            button("toggle modal").attr(onclick=toggleModal(modal_state)),
+            button("toggle modal").attr(onclick=toggleModal()),
             div("Esto es modal: ", modal_state).id("modal").classes("card").row(),
             div(
                 button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
@@ -216,7 +216,7 @@ def home(session, req: HttpRequest):
                 div(
                     textInput().id("item_compra"),
                     button("Create").attr(
-                        onclick=addTodoIfNotEmpty("item_compra", todoStore)
+                        onclick=addTodoIfNotEmpty("item_compra")
                     ),
                 ).row(),
             ),

@@ -168,6 +168,7 @@ class AuthStore:
         self._js = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
+
     def auth(self, session: Session) -> Store:
         key = self.auth_func(session)
         if key not in self.data:
@@ -175,3 +176,21 @@ class AuthStore:
                 default=copy.deepcopy(self.default), subscribe=False, id=self._id
             )
         return self.data[key]
+
+
+    # Store methods to allow use in JS Functions
+    # TODO: change error to raise Not Authenticated
+    def set(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def get(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def update(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def create(self, *args, **kwargs):
+        raise NotImplementedError()

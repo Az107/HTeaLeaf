@@ -9,3 +9,4 @@ src/.DS_Store
 /build
 HTeaLeaf.egg-info/*
 /src/TeaLeaf.egg-info
+src/HTeaLeaf.egg-info
