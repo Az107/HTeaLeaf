@@ -1,6 +1,5 @@
 import inspect
 import json
-from os import name
 import textwrap
 from types import FunctionType
 from typing import Any
@@ -61,7 +60,7 @@ class JSCode:
         return JSCode(f"({self.raw} < {other})")
 
     def call(self, *args):
-        from ..Store import AuthStore, Store
+        # from ..Store import AuthStore, Store
 
         parsed = []
         for arg in args:
@@ -88,6 +87,7 @@ class JSCode:
 class JSFunction:
     def __init__(self, name: str, raw: str):
         from ..RenderContext import get_render_ctx
+
         super().__init__()
         self.name = name
         self.raw = raw
@@ -109,23 +109,29 @@ class JSFunction:
         return JSCode(f"{self.name}")(*processed)
 
 
+FUNCTION_CACHE = {}
+
+
 def js(fn: FunctionType):
-    src = textwrap.dedent(inspect.getsource(fn))
-    lines = src.splitlines()
-    lines = [l for l in lines if not l.strip().startswith("@js")]
-    src = "\n".join(lines)
-    closure_vars = inspect.getclosurevars(fn)
-    all_vars = {**fn.__globals__, **closure_vars.nonlocals, **closure_vars.globals}
-    replace_map = get_jscode_ids(all_vars)
-    return JSFunction(fn.__name__, transpile(src, replace_map))
+    if fn.__code__ not in FUNCTION_CACHE:
+        src = textwrap.dedent(inspect.getsource(fn))
+        lines = src.splitlines()
+        lines = [line for line in lines if not line.strip().startswith("@js")]
+        src = "\n".join(lines)
+        closure_vars = inspect.getclosurevars(fn)
+        all_vars = {**fn.__globals__, **closure_vars.nonlocals, **closure_vars.globals}
+        replace_map = get_jscode_ids(all_vars)
+        FUNCTION_CACHE[fn.__code__] = transpile(src, replace_map)
+
+    return JSFunction(fn.__name__, FUNCTION_CACHE[fn.__code__])
 
 
 def get_jscode_ids(all_vars) -> dict[str, str]:
     name_map = {}
     for var_name, var_val in all_vars.items():
         # LocalState y Store exponen .js (JSCode), cuyo .raw es el identificador JS
-        if hasattr(var_val, 'raw'):
+        if hasattr(var_val, "raw"):
             name_map[var_name] = var_val.raw
-        elif hasattr(var_val, '_js'):
+        elif hasattr(var_val, "_js"):
             name_map[var_name] = var_val._js.raw
     return name_map

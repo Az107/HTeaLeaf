@@ -2,8 +2,6 @@ import hashlib
 import inspect
 import json
 
-from HTeaLeaf.Html.Elements import script
-
 from ..Magic.jslib.JSCode import JSCode
 from .RenderContext import get_render_ctx
 

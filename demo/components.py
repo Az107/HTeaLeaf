@@ -215,9 +215,7 @@ def home(session, req: HttpRequest):
                 ).style(padding="20px", height="200px", overflow_y="scroll"),
                 div(
                     textInput().id("item_compra"),
-                    button("Create").attr(
-                        onclick=addTodoIfNotEmpty("item_compra")
-                    ),
+                    button("Create").attr(onclick=addTodoIfNotEmpty("item_compra")),
                 ).row(),
             ),
         ),
