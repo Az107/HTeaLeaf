@@ -30,14 +30,9 @@ def auth_session(session: Session):
     return None
 
 
-cstore: Store | None = None
-todoStore: AuthStore | None = None
-
-
 def init(app: Server):
     global cstore
     global todoStore
-    print("test")
 
     enable_reactivity(app)
     SuperStore(app)
@@ -68,8 +63,6 @@ def health(req: HttpRequest):
 
 
 def contar():
-    if cstore is None:
-        return None
 
     return div(
         button("-").attr(
@@ -131,8 +124,6 @@ def userNav(req: HttpRequest):
 
 
 def elementoCompra(id, task):
-    if todoStore is None:
-        return None
 
     return (
         div(
@@ -156,9 +147,6 @@ def logout(session):
 
 
 def home(session, req: HttpRequest):
-    if todoStore is None:
-        return None
-
     if not session.has("userName"):
         return redirect("/login")
 
