@@ -1,4 +1,4 @@
-from HTeaLeaf.Html.Elements import (
+from HTeaLeaf.Elements import (
     body,
     button,
     checkbox,
@@ -15,12 +15,12 @@ from HTeaLeaf.Html.Elements import (
     submit,
     textInput,
 )
-from HTeaLeaf.Magic.HelperMidleware import enable_reactivity
-from HTeaLeaf.Magic.jslib import js
-from HTeaLeaf.Magic.jslib.common import alert, document, window
-from HTeaLeaf.Magic.LocalState import use_state
-from HTeaLeaf.Magic.Store import AuthStore, Store, SuperStore
+from HTeaLeaf.JS import js
+from HTeaLeaf.JS.common import alert, document, window
 from HTeaLeaf.Server.Server import HttpRequest, Server, Session
+from HTeaLeaf.State.HelperMidleware import enable_reactivity
+from HTeaLeaf.State.LocalState import use_state
+from HTeaLeaf.State.Store import AuthStore, Store, SuperStore
 from HTeaLeaf.utils import redirect
 
 

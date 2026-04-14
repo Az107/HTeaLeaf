@@ -3,8 +3,7 @@ import os
 import uuid
 from typing import Any
 
-from ..Html.Component import Component
-from ..Html.Elements import div, script
+from ..Elements import Component, div, script
 
 
 class FetchComponent(Component):
@@ -24,7 +23,7 @@ class FetchComponent(Component):
         placeholder = div("Loading...").id(self._reid)
         super().__init__("div", placeholder)
         # Configuración de la petición
-        config = {"method": "POST" if body is not None else "GET", "body": body }
+        config = {"method": "POST" if body is not None else "GET", "body": body}
         # Serializar la configuración en JSON para JS
         _js_file = os.path.dirname(__file__) + "/MagicComponent.js"
         url = json.dumps(url)
@@ -41,6 +40,7 @@ class FetchComponent(Component):
 
         return self._reid
 
+
 class rButton(Component):
     """
     A reactive button that triggers updates on FetchComponents.
@@ -54,7 +54,7 @@ class rButton(Component):
         """
         super().__init__("button", *childs)
 
-    def reactive(self,path,component: FetchComponent):
+    def reactive(self, path, component: FetchComponent):
         """
         Makes the button reactive by linking it to a FetchComponent.
 
@@ -62,17 +62,18 @@ class rButton(Component):
         :param component: The FetchComponent to be updated.
         """
 
-        #config = {"method": "GET"}
+        # config = {"method": "GET"}
         if not hasattr(component, "reid"):
             raise Exception("component is not reactive")
         id = component.reid()
         # Serializar la configuración en JSON para JS
-        #config_js = json.dumps(config)
+        # config_js = json.dumps(config)
         js = f"""fetchAndUpdate('{path}','{{}}','{id}')"""
         self.attr(onclick=js)
         return self
 
-    #def refresh(self, path)
+    # def refresh(self, path)
+
 
 class HydratedComponent(Component):
     """

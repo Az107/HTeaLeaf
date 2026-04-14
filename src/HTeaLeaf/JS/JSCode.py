@@ -86,7 +86,7 @@ class JSCode:
 
 class JSFunction:
     def __init__(self, name: str, raw: str):
-        from ..RenderContext import get_render_ctx
+        from ..State.RenderContext import get_render_ctx
 
         super().__init__()
         self.name = name

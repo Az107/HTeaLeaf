@@ -2,7 +2,7 @@ import os
 import sys
 from urllib.parse import parse_qs
 
-from ..Html.Component import Component
+from ..Elements import Component
 from .Server import Server
 
 

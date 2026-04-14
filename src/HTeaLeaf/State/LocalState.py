@@ -2,7 +2,7 @@ import hashlib
 import inspect
 import json
 
-from ..Magic.jslib.JSCode import JSCode
+from ..JS import JSCode
 from .RenderContext import get_render_ctx
 
 # class localState():

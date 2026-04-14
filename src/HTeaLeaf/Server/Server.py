@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Callable
 from uuid import uuid4
 
-from ..Html.Component import Component
+from ..Elements import Component
 from .Http.HttpHeader import Headers
 from .Http.HttpRequest import HttpRequest
 from .Http.HttpResponse import HttpResponse, HttpStatus

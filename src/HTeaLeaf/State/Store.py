@@ -3,10 +3,8 @@ import json
 from typing import Any
 from uuid import uuid4
 
-from HTeaLeaf.Magic.jslib.JSCode import JSCode
-
-from ..Html.Component import Component
-from ..Html.Elements import div, script
+from ..Elements import Component, div, script
+from ..JS import JSCode
 from ..Server.Server import HttpRequest, Server, ServerEvent, Session
 
 
@@ -168,7 +166,6 @@ class AuthStore:
         self._js = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
-
     def auth(self, session: Session) -> Store:
         key = self.auth_func(session)
         if key not in self.data:
@@ -176,7 +173,6 @@ class AuthStore:
                 default=copy.deepcopy(self.default), subscribe=False, id=self._id
             )
         return self.data[key]
-
 
     # Store methods to allow use in JS Functions
     # TODO: change error to raise Not Authenticated

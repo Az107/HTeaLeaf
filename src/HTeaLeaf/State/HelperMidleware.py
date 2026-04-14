@@ -1,5 +1,4 @@
-from ..Html.Component import Component
-from ..Html.Elements import script
+from ..Elements import Component, script
 from ..Server.Server import Server, ServerEvent
 from .RenderContext import enable_render_context
 

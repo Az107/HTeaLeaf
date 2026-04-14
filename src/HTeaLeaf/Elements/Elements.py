@@ -1,19 +1,41 @@
 from types import FunctionType
 from typing import Any, List, Union
 
-from HTeaLeaf.Magic.jslib import JSCode, JSFunction, js
-
+from ..JS import JSCode, JSFunction, js
 from .Component import Component, ComponentMeta
+
+__all__ = [
+    "html",
+    "head",
+    "header",
+    "link",
+    "script",
+    "body",
+    "style",
+    "div",
+    "button",
+    "select",
+    "option",
+    "label",
+    "form",
+    "checkbox",
+    "textInput",
+    "option",
+    "submit",
+]
 
 
 class html(Component, metaclass=ComponentMeta):
     pass
 
+
 class head(Component, metaclass=ComponentMeta):
     pass
 
+
 class header(Component, metaclass=ComponentMeta):
     pass
+
 
 class link(Component, metaclass=ComponentMeta):
     def __init__(self, *childs):
@@ -21,7 +43,9 @@ class link(Component, metaclass=ComponentMeta):
 
 
 class script(Component):
-    def __init__(self, *childs: Union[str, List[Any], "Component", JSFunction] ,src=None):
+    def __init__(
+        self, *childs: Union[str, List[Any], "Component", JSFunction], src=None
+    ):
         parsed_childs: Union[str, List[Any], "Component"] = []
         for child in childs:
             if type(child) is FunctionType:
@@ -36,7 +60,6 @@ class script(Component):
             self.attr(src=src)
             self.children = [""]
         # else:
-
 
 
 class style(Component, metaclass=ComponentMeta):
@@ -72,8 +95,7 @@ class div(Component, metaclass=ComponentMeta):
 
 
 class button(Component, metaclass=ComponentMeta):
-
-    def reactive(self,path,component_id):
+    def reactive(self, path, component_id):
         """
         Makes the button reactive by linking it to a FetchComponent.
 
@@ -86,26 +108,29 @@ class button(Component, metaclass=ComponentMeta):
         return self
 
 
-
 class label(Component, metaclass=ComponentMeta):
     pass
 
+
 class checkbox(Component):
-    def __init__(self,checked = False, *childs):
+    def __init__(self, checked=False, *childs):
         super().__init__("input", *childs)
         self.attr(type="checkbox")
         if checked:
             self.attr(checked="True")
 
+
 class textInput(Component):
     def __init__(self, *childs):
         super().__init__("input", *childs)
+
 
 class select(Component):
     def __init__(self, items: List[str]):
         super().__init__("select")
         for item in items:
             self.append(option(item))
+
 
 class option(Component):
     def __init__(self, value):
@@ -118,6 +143,7 @@ class submit(Component):
         super().__init__("input", *childs)
         self.attr(type="submit")
 
+
 class form(Component):
     def __init__(self, *childs):
         super().__init__("form", *childs)
@@ -129,6 +155,7 @@ class form(Component):
     def method(self, method):
         self.attr(method=method)
         return self
+
 
 def tl_if(condition: JSCode | str | bool, *childs):
     if isinstance(condition, str):

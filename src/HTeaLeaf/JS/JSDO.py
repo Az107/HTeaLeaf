@@ -3,10 +3,8 @@ import inspect
 import json
 import re
 from typing import Any
-from uuid import uuid4
 
-from HTeaLeaf.Html.Elements import script
-
+from ..Elements import script
 from .JSCode import JSCode
 
 
@@ -20,7 +18,6 @@ class JSDO:
         self.obj_name = f"{object_name.lower()}_{id}"
         self.store_js = f"const {self.obj_name} = new {object_name}({json.dumps(arg)}); {self.obj_name}.id = '{self.obj_name}';"
 
-
     def __call__(self):
         return JSCode(self.obj_name)
 
@@ -28,7 +25,6 @@ class JSDO:
 
         def mark_js(obj):
             if isinstance(obj, JSCode):
-
                 return f"__JS__:{obj.raw}"
             elif isinstance(obj, (list, tuple)):
                 return [mark_js(o) for o in obj]
@@ -39,18 +35,17 @@ class JSDO:
 
         marked = [mark_js(arg) for arg in args]
         payload = json.dumps(marked)
-        payload = re.sub(r'"__JS__:(.*?)(?<!\\)"', lambda m: m.group(1).replace('\\"','"'), payload)
-        base_js = f"""{self.obj_name}.{func_name}({payload[1:-1]})"""
-        return JSCode(
-            base_js
+        payload = re.sub(
+            r'"__JS__:(.*?)(?<!\\)"', lambda m: m.group(1).replace('\\"', '"'), payload
         )
+        base_js = f"""{self.obj_name}.{func_name}({payload[1:-1]})"""
+        return JSCode(base_js)
 
     def new(self):
         return script(self.store_js)
 
     def get(self, *args):
         return self.__format_js__("get", *args)
-
 
     def set(self, *args):
         print("args:", args)

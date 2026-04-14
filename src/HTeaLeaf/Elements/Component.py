@@ -2,7 +2,7 @@ import hashlib
 import json
 from typing import Any, List, Union
 
-from ..Magic.jslib.JSCode import JSCode
+from ..JS import JSCode
 
 
 class Component:
@@ -11,7 +11,9 @@ class Component:
     This class allows constructing HTML elements programmatically and managing CSS styles.
     """
 
-    def __init__(self, name, *childs: Union[str, List[Any], "Component", "JSCode"]) -> None:
+    def __init__(
+        self, name, *childs: Union[str, List[Any], "Component", "JSCode"]
+    ) -> None:
         """
         Initializes a new Component instance.
 
@@ -32,7 +34,7 @@ class Component:
             "children": [
                 child._id if isinstance(child, Component) else str(child)
                 for child in self.children
-            ]
+            ],
         }
         raw = json.dumps(content, sort_keys=True)
         hash_str = hashlib.md5(raw.encode()).hexdigest()[:12]
@@ -69,7 +71,6 @@ class Component:
         :return: The component instance (for method chaining).
         """
 
-
         self.styles = (self.styles or "") + f"#{self._id} {{\n"
         self.styles += "\n".join(
             f"  {k.replace('_', '-')}: {v};" for k, v in attr.items()
@@ -81,7 +82,7 @@ class Component:
                 self.styles += f.read()
         return self
 
-    def attr(self,*args, **attr):
+    def attr(self, *args, **attr):
         """
         Adds custom attributes to the component.
 
@@ -128,7 +129,8 @@ class Component:
 
     def __build_attr__(self) -> str:
         return " " + " ".join(
-            f"{k}='{v}'" if v is not None else f"{k}" for k, v in self.attributes.items()
+            f"{k}='{v}'" if v is not None else f"{k}"
+            for k, v in self.attributes.items()
         )
 
     def __build_child__(self, children: list):

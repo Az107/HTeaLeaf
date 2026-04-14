@@ -1,8 +1,7 @@
 # thread-local render context
 import threading
 
-from ..Html.Component import Component
-from ..Html.Elements import script
+from ..Elements import Component, script
 from ..Server.Server import Server, ServerEvent
 
 _render_ctx = threading.local()
