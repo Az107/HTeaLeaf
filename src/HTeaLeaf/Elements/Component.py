@@ -62,7 +62,7 @@ class Component:
         self.attributes["class"] = classes
         return self
 
-    def style(self, path: str | None = None, **attr):
+    def style(self, path: str | None = None, inline: bool = False, **attr):
         """
         Adds inline styles to the component.
 
@@ -70,16 +70,20 @@ class Component:
         :param attr: CSS properties to apply (e.g., color="red", margin="10px").
         :return: The component instance (for method chaining).
         """
+        if inline:
+            self.attributes["style"] = " ".join(
+                f"{k.replace('_', '-')}:{v};" for k, v in attr.items()
+            )
+        else:
+            self.styles = (self.styles or "") + f"#{self._id} {{\n"
+            self.styles += "\n".join(
+                f"  {k.replace('_', '-')}: {v};" for k, v in attr.items()
+            )
+            self.styles += "\n}\n"
 
-        self.styles = (self.styles or "") + f"#{self._id} {{\n"
-        self.styles += "\n".join(
-            f"  {k.replace('_', '-')}: {v};" for k, v in attr.items()
-        )
-        self.styles += "\n}\n"
-
-        if path:
-            with open(path, "r") as f:
-                self.styles += f.read()
+            if path:
+                with open(path, "r") as f:
+                    self.styles += f.read()
         return self
 
     def attr(self, *args, **attr):
@@ -147,9 +151,6 @@ class Component:
                 html, css = child.build()
                 html_parts.append(html)
                 css_parts.append(css)
-            # elif isinstance(child, JSDO):
-            #     print(f"JSCode: {child().raw}")
-            #     html_parts.append(f"{{{{{child().raw}}}}}")
             elif isinstance(child, JSCode):
                 # JSCode outside of an attribute should be a special tag {{jscode_name}}
                 print(f"JSCode: {child.raw}")

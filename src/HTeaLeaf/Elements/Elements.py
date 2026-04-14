@@ -5,6 +5,9 @@ from ..JS import JSCode, JSFunction, js
 from .Component import Component, ComponentMeta
 
 __all__ = [
+    "h1",
+    "h2",
+    "h3",
     "html",
     "head",
     "header",

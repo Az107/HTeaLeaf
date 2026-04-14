@@ -2,7 +2,7 @@ const states = [];
 
 class LocalState {
   constructor(init_val, id) {
-    this.id = id; //TODO: add to constructor args
+    this.id = id;
     this.val = init_val;
     this._nodes = []; // { node, template }
     states.push(this);
@@ -28,19 +28,21 @@ class LocalState {
   }
 
   _collectAttr() {
+    const tag = `{{${this.id}}}`;
     const walker = document.createTreeWalker(
       document.body,
-      NodeFilter.SHOW_ATTRIBUTE,
+      NodeFilter.SHOW_ELEMENT,
     );
     let node;
 
     while ((node = walker.nextNode())) {
+      console.log("Collecting attr of ", node);
       const attrs = node.attributes;
       for (let i = 0; i < attrs.length; i++) {
         const attr = attrs[i];
-        if (attr.value.includes(`${this.id}`)) {
+        if (attr.value.includes(tag)) {
           this._nodes.push({ node, attr, template: attr.value });
-          attr.value = attr.value.replaceAll(`${this.id}`, this.val);
+          attr.value = attr.value.replaceAll(tag, this.val);
         }
       }
     }
@@ -56,7 +58,6 @@ class LocalState {
 
     while ((node = walker.nextNode())) {
       if (node.nodeValue.includes(tag)) {
-        // Guardamos el template original para reemplazos futuros
         this._nodes.push({ node, template: node.nodeValue });
         node.nodeValue = node.nodeValue.replaceAll(tag, this.val);
       }

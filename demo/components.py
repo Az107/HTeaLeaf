@@ -150,8 +150,7 @@ def home(session, req: HttpRequest):
     if not session.has("userName"):
         return redirect("/login")
 
-    modal_state = use_state(True)
-    age = use_state(0)
+    modal_state = use_state("none")
     localCounter = use_state(0)
 
     @js
@@ -165,11 +164,10 @@ def home(session, req: HttpRequest):
 
     @js
     def toggleModal():
-        modal_state.set(not modal_state.get())
-        new_display = "none"
-        if modal_state.get():
-            new_display = "block"
-        document.getElementById("modal").style.display = new_display
+        if modal_state.get() == "none":
+            modal_state.set("block")
+        else:
+            modal_state.set("none")
 
     web = html(
         head(
@@ -179,13 +177,17 @@ def home(session, req: HttpRequest):
             header(
                 div(
                     h1("HTeaLeaf!").style(color="green"),
-                    button(
-                        f"Welcome {session['userName']} {{{{{age}}}}}",
-                    ).attr(onclick=window.location.replace("/logout")),
+                    button(f"Welcome {session['userName']} {localCounter}").attr(
+                        onclick=window.location.replace("/logout")
+                    ),
                 ).row()
             ),
             button("toggle modal").attr(onclick=toggleModal()),
-            div("Esto es modal: ", modal_state).id("modal").classes("card").row(),
+            div("Esto es modal none: ", modal_state)
+            .id("modal")
+            .classes("card")
+            .row()
+            .style(inline=True, display=modal_state),
             div(
                 button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
                 localCounter,

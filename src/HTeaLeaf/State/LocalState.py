@@ -21,6 +21,11 @@ from .RenderContext import get_render_ctx
 #         return self.do.set(data)
 
 
+class LocalState(JSCode):
+    def __format__(self, format_spec: str, /) -> str:
+        return "{{" + self.raw + "}}"
+
+
 def use_state(init_state):
     frame = inspect.stack()[1]
     site = f"{frame.filename}:{frame.lineno}"
@@ -34,4 +39,4 @@ def use_state(init_state):
     if ctx:
         ctx.register_state(initializer)
 
-    return JSCode(name)
+    return LocalState(name)
