@@ -18,10 +18,10 @@ from HTeaLeaf.Elements import (
 from HTeaLeaf.JS import js
 from HTeaLeaf.JS.common import alert, document, window
 from HTeaLeaf.Server.Server import HttpRequest, Server, Session
+from HTeaLeaf.Server.utils import redirect
 from HTeaLeaf.State.HelperMidleware import enable_reactivity
 from HTeaLeaf.State.LocalState import use_state
 from HTeaLeaf.State.Store import AuthStore, Store, SuperStore
-from HTeaLeaf.utils import redirect
 
 
 def auth_session(session: Session):
@@ -39,8 +39,8 @@ def init(app: Server):
     cstore = Store({"counter": 1})
     todoStore = AuthStore(auth_session, {"todo": []})
     app.add_path("/health", health)
-    app.add_path("/contar", contar)
-    app.add_path("/hello/{name}", saluda)
+    app.add_path("/contar", counter)
+    app.add_path("/hello/{name}", greet)
     app.add_path("/login", user)
     app.add_path("/example", userNav)
     app.add_path("/logout", logout)
@@ -62,7 +62,7 @@ def health(req: HttpRequest):
     }
 
 
-def contar():
+def counter():
 
     return div(
         button("-").attr(
@@ -77,7 +77,7 @@ def contar():
     ).row()
 
 
-def saluda(name):
+def greet(name):
     return (
         200,
         [("potato-header", "yay")],
@@ -123,7 +123,7 @@ def userNav(req: HttpRequest):
     return userCard
 
 
-def elementoCompra(id, task):
+def todoItem(id, task):
 
     return (
         div(
@@ -196,16 +196,16 @@ def home(session, req: HttpRequest):
             .classes("card")
             .row(),
             div(
-                contar(),
+                counter(),
                 div(
                     [
-                        elementoCompra(idx, c)
+                        todoItem(idx, c)
                         for idx, c in enumerate(todoStore.auth(session).read("todo"))
                     ]
                 ).style(padding="20px", height="200px", overflow_y="scroll"),
                 div(
-                    textInput().id("item_compra"),
-                    button("Create").attr(onclick=addTodoIfNotEmpty("item_compra")),
+                    textInput().id("todo_item"),
+                    button("Create").attr(onclick=addTodoIfNotEmpty("todo_item")),
                 ).row(),
             ),
         ),

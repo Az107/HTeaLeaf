@@ -5,21 +5,6 @@ import json
 from ..JS import JSCode
 from .RenderContext import get_render_ctx
 
-# class localState():
-#     def __init__(self, init_state):
-#         self.do = JSDO("LocalState",init_state)
-
-#     def
-
-#     def js(self):
-#         return self.do.js()
-
-#     def get(self):
-#         return self.do.get()
-
-#     def set(self, data):
-#         return self.do.set(data)
-
 
 class LocalState(JSCode):
     def __format__(self, format_spec: str, /) -> str:

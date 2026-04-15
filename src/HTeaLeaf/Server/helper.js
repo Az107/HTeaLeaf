@@ -132,6 +132,7 @@ async function fetch_front() {
   }
 }
 
+// Reconciliation
 function authority_zero(a, b) {
   if (a.children == undefined) {
     b.innerHTML = a.innerHTML;

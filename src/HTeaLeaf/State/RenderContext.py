@@ -32,7 +32,7 @@ def _inject_context(node: Component):
     if not scripts:
         return
 
-    # BFS buscando nodo head
+    # BFS search head node
     queue = [node]
     while queue:
         current = queue.pop(0)
@@ -44,7 +44,7 @@ def _inject_context(node: Component):
             if isinstance(child, Component):
                 queue.append(child)
 
-    # Fallback: inyectar en raíz
+    # Fallback: inyect at root
     for s in reversed(scripts):
         node.prepend(s)
 

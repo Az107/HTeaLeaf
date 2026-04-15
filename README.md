@@ -3,7 +3,7 @@
 **HTeaLeaf** is a *declarative web framework for Python* —
 build dynamic, reactive web apps using **pure Python**, without writing templates or frontend JavaScript manually.
 
-> ⚠️ Currently in alpha — stable enough for experimentation and demos, but the public API may still change before beta.
+>⚠️ Beta — HTeaLeaf is usable and the core API is stable, but you may encounter performance issues or unexpected bugs. Not recommended for production yet. Feedback and bug reports are very welcome.
 
 ---
 
@@ -21,8 +21,8 @@ and HTeaLeaf takes care of keeping everything in sync automatically.
 
 ```python
 from HTeaLeaf.Server.WSGI import WSGI
-from HTeaLeaf.Magic.Store import Store, SuperStore
-from HTeaLeaf.Html.Elements import div, h3, button
+from HTeaLeaf.State.Store import Store, SuperStore
+from HTeaLeaf.Elements import div, h3, button
 
 app = WSGI()
 SuperStore(app)
@@ -46,13 +46,13 @@ if __name__ == "__main__":
         server.serve_forever()
 ```
 
-Visit `http://127.0.0.1:8000` — a fully reactive counter, zero JavaScript written by hand.
+Visit `http://127.0.0.1:8000`  a fully reactive counter, zero JavaScript written by hand.
 
 You can also write client-side logic directly in Python using the `@js` decorator,
 and HTeaLeaf will compile it to JavaScript automatically:
 
 ```python
-from HTeaLeaf.Magic.JSCode import js
+from HTeaLeaf.JS import js
 
 @js
 def greet(event):
@@ -65,11 +65,11 @@ button("Click me").attr(onclick=greet)
 
 ## ✨ Key Features
 
-- **Declarative HTML** — build DOM trees with a fluent Python DSL, no templates needed
-- **Reactive server state** — `Store` objects stay in sync with the UI automatically
-- **Local route state** — `use_state()` for state scoped to a single route
-- **Python → JS transpilation** — write client-side logic in Python with `@js`; HTeaLeaf compiles it
-- **Session support** — per-user state with `AuthStore` and cookies
+- **Declarative HTML**: build DOM trees with a fluent Python DSL, no templates needed
+- **Reactive server state**: `Store` objects stay in sync with the UI automatically
+- **Local route state**: `use_state()` for state scoped to a single route
+- **Python → JS transpilation**: write client-side logic in Python with `@js`; HTeaLeaf compiles it
+- **Session support**: per-user state with `AuthStore` and cookies
 
 ---
 
@@ -90,9 +90,11 @@ pip install htealeaf
 - [x] Local route state (`use_state()`)
 - [x] Session support
 - [x] Client-side-only state (no server round-trip)
-- [ ] Persistent Store backends (Redis, SQL, …)
-- [ ] CLI
 - [ ] Render optimisation
+- [ ] Persistent Store backends (Redis, SQL, …)
+- [ ] Async first architecture
+- [ ] CLI
+- [ ] Build system to static assets
 
 ---
 
