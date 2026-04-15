@@ -2,8 +2,8 @@ import os
 import sys
 from urllib.parse import parse_qs
 
+from ..Elements import Component
 from .Server import Server
-from ..Html.Component import Component
 
 
 class CGI(Server):

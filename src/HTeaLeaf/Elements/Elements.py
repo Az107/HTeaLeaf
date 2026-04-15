@@ -1,9 +1,31 @@
-import re
-import sys
+from types import FunctionType
 from typing import Any, List, Union
 
-from TeaLeaf.Html.Component import Component, ComponentMeta
-from TeaLeaf.Html.JSCode import JSCode
+from ..JS import JSCode, JSFunction, js
+from .Component import Component, ComponentMeta
+
+__all__ = [
+    "h1",
+    "h2",
+    "h3",
+    "html",
+    "head",
+    "header",
+    "link",
+    "script",
+    "body",
+    "style",
+    "div",
+    "button",
+    "select",
+    "option",
+    "label",
+    "form",
+    "checkbox",
+    "textInput",
+    "option",
+    "submit",
+]
 
 
 class html(Component, metaclass=ComponentMeta):
@@ -13,29 +35,34 @@ class html(Component, metaclass=ComponentMeta):
 class head(Component, metaclass=ComponentMeta):
     pass
 
+
 class header(Component, metaclass=ComponentMeta):
     pass
 
+
 class link(Component, metaclass=ComponentMeta):
-    pass
+    def __init__(self, *childs):
+        super().__init__("link", *childs)
+
 
 class script(Component):
-    def __init__(self, *childs: Union[str, List[Any], "Component"] ,src=None):
-        super().__init__("script", *childs)
+    def __init__(
+        self, *childs: Union[str, List[Any], "Component", JSFunction], src=None
+    ):
+        parsed_childs: Union[str, List[Any], "Component"] = []
+        for child in childs:
+            if type(child) is FunctionType:
+                parsed_childs.append(js(child))
+            elif type(child) is JSFunction:
+                parsed_childs.append(child)
+            else:
+                parsed_childs.append(child)
+        super().__init__("script", *parsed_childs)
         self.unsafe = True
-        if src != None:
+        if src is not None:
             self.attr(src=src)
             self.children = [""]
-        else:
-            funcs = []
-            for child in childs:
-                if type(child) is str:
-                    pattern = r'\bfunction\s+([A-Za-z_$][\w$]*)\s*\('
-                    funcs += re.findall(pattern, child)
-            main_globals = sys.modules["__main__"].__dict__
-            for func in funcs:
-                main_globals[func] = JSCode(func)
-
+        # else:
 
 
 class style(Component, metaclass=ComponentMeta):
@@ -71,8 +98,7 @@ class div(Component, metaclass=ComponentMeta):
 
 
 class button(Component, metaclass=ComponentMeta):
-
-    def reactive(self,path,component_id):
+    def reactive(self, path, component_id):
         """
         Makes the button reactive by linking it to a FetchComponent.
 
@@ -85,25 +111,41 @@ class button(Component, metaclass=ComponentMeta):
         return self
 
 
-
 class label(Component, metaclass=ComponentMeta):
     pass
 
+
 class checkbox(Component):
-    def __init__(self,checked = False, *childs):
+    def __init__(self, checked=False, *childs):
         super().__init__("input", *childs)
         self.attr(type="checkbox")
         if checked:
             self.attr(checked="True")
 
+
 class textInput(Component):
     def __init__(self, *childs):
         super().__init__("input", *childs)
+
+
+class select(Component):
+    def __init__(self, items: List[str]):
+        super().__init__("select")
+        for item in items:
+            self.append(option(item))
+
+
+class option(Component):
+    def __init__(self, value):
+        super().__init__("option", value)
+        self.attr(value=value)
+
 
 class submit(Component):
     def __init__(self, *childs):
         super().__init__("input", *childs)
         self.attr(type="submit")
+
 
 class form(Component):
     def __init__(self, *childs):
@@ -116,3 +158,10 @@ class form(Component):
     def method(self, method):
         self.attr(method=method)
         return self
+
+
+def tl_if(condition: JSCode | str | bool, *childs):
+    if isinstance(condition, str):
+        condition = JSCode(condition)
+
+    return div(*childs).attr(style=f"display: {condition};")

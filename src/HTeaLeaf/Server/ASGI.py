@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
 
-from TeaLeaf.Server.Http.HttpHeader import Headers
-
+from .Http.HttpHeader import Headers
 from .Server import HttpRequest, Server
 
 
@@ -21,8 +20,6 @@ class Scope:
     client: tuple[str,int]
     server:  tuple[str, Optional[int]]
     state: Optional[dict[str,Any]]
-
-
 
 
 

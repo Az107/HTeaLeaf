@@ -1,18 +1,77 @@
+const states = [];
+
 class LocalState {
-  constructor(init_val) {
+  constructor(init_val, id) {
+    this.id = id;
     this.val = init_val;
+    this._nodes = []; // { node, template }
+    states.push(this);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => this._collect());
+    } else {
+      this._collect();
+    }
   }
 
   set(data) {
     this.val = data;
-  }
-
-  update(data) {
-    this.val = data;
+    this._render();
   }
 
   get() {
     return this.val;
+  }
+
+  _collect() {
+    this._collectText();
+    this._collectAttr();
+  }
+
+  _collectAttr() {
+    const tag = `{{${this.id}}}`;
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_ELEMENT,
+    );
+    let node;
+
+    while ((node = walker.nextNode())) {
+      console.log("Collecting attr of ", node);
+      const attrs = node.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const attr = attrs[i];
+        if (attr.value.includes(tag)) {
+          this._nodes.push({ node, attr, template: attr.value });
+          attr.value = attr.value.replaceAll(tag, this.val);
+        }
+      }
+    }
+  }
+
+  _collectText() {
+    const tag = `{{${this.id}}}`;
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+    );
+    let node;
+
+    while ((node = walker.nextNode())) {
+      if (node.nodeValue.includes(tag)) {
+        this._nodes.push({ node, template: node.nodeValue });
+        node.nodeValue = node.nodeValue.replaceAll(tag, this.val);
+      }
+    }
+  }
+
+  _render() {
+    for (let { node, attr, template } of this._nodes) {
+      if (attr) {
+        attr.value = template.replaceAll(`{{${this.id}}}`, this.val);
+      } else {
+        node.nodeValue = template.replaceAll(`{{${this.id}}}`, this.val);
+      }
+    }
   }
 }
 
@@ -66,16 +125,20 @@ async function fetch_front() {
     let serverHtml = await result.text();
     let vdom = new DOMParser().parseFromString(serverHtml, "text/html");
     authority_zero(vdom.body, document.body);
+    for (let state of states) {
+      state._collect();
+      state._render();
+    }
   }
 }
 
+// Reconciliation
 function authority_zero(a, b) {
   if (a.children == undefined) {
     b.innerHTML = a.innerHTML;
     return;
   }
   for (const [vdom, dom] of zip(a.children, b.children)) {
-    //if (vdom.id.startsWith("tlmg")) continue;
     if (vdom.isEqualNode(dom)) continue;
     if (vdom.children.length == 0) {
       dom.innerHTML = vdom.innerHTML;

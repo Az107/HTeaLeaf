@@ -1,9 +1,8 @@
-import uuid
-from typing import List, Union, Any
-import html as html_tools
+import hashlib
+import json
+from typing import Any, List, Union
 
-
-
+from ..JS import JSCode
 
 
 class Component:
@@ -12,7 +11,9 @@ class Component:
     This class allows constructing HTML elements programmatically and managing CSS styles.
     """
 
-    def __init__(self, name, *childs: Union[str, List[Any], "Component"]) -> None:
+    def __init__(
+        self, name, *childs: Union[str, List[Any], "Component", "JSCode"]
+    ) -> None:
         """
         Initializes a new Component instance.
 
@@ -21,10 +22,23 @@ class Component:
         """
 
         self.styles: str | None = None
-        self._id: str = "tl" + str(uuid.uuid4())
         self.name = name
-        self.children: list[Component | str | list] = list(childs)
+        self.children: list[Component | str | list | JSCode] = list(childs)
         self.attributes: dict[str, str | None] = dict()
+        self._id: str = self._generate_id()
+
+    def _generate_id(self) -> str:
+        """Genera un ID determinista basado en el contenido del componente."""
+        content = {
+            "name": self.name,
+            "children": [
+                child._id if isinstance(child, Component) else str(child)
+                for child in self.children
+            ],
+        }
+        raw = json.dumps(content, sort_keys=True)
+        hash_str = hashlib.md5(raw.encode()).hexdigest()[:12]
+        return f"tl-{hash_str}"
 
     def id(self, id: str):
         """
@@ -48,7 +62,7 @@ class Component:
         self.attributes["class"] = classes
         return self
 
-    def style(self, path: str | None = None, **attr):
+    def style(self, path: str | None = None, inline: bool = False, **attr):
         """
         Adds inline styles to the component.
 
@@ -56,19 +70,23 @@ class Component:
         :param attr: CSS properties to apply (e.g., color="red", margin="10px").
         :return: The component instance (for method chaining).
         """
+        if inline:
+            self.attributes["style"] = " ".join(
+                f"{k.replace('_', '-')}:{v};" for k, v in attr.items()
+            )
+        else:
+            self.styles = (self.styles or "") + f"#{self._id} {{\n"
+            self.styles += "\n".join(
+                f"  {k.replace('_', '-')}: {v};" for k, v in attr.items()
+            )
+            self.styles += "\n}\n"
 
-        self.styles = (self.styles or "") + f"#{self._id} {{\n"
-        self.styles += "\n".join(
-            f"  {k.replace('_', '-')}: {v};" for k, v in attr.items()
-        )
-        self.styles += "\n}"
-
-        if path:
-            with open(path, "r") as f:
-                self.styles += f.read()
+            if path:
+                with open(path, "r") as f:
+                    self.styles += f.read()
         return self
 
-    def attr(self,*args, **attr):
+    def attr(self, *args, **attr):
         """
         Adds custom attributes to the component.
 
@@ -81,7 +99,10 @@ class Component:
 
         for k in attr:
             # if type(attr[k]) is str:
-            self.attributes[k] = str(attr[k])
+            value = attr[k]
+            # if isinstance(value, JSCode):
+            #     value = f"{{{{{str(value)}}}}}"
+            self.attributes[k] = value
             # elif type(attr[k]) is FunctionType:
             #     py_f = inspect.getsource(attr[k])
             #     self.attributes[k] = f"""() => pyodide.runPython(`{py_f}`)"""
@@ -99,9 +120,21 @@ class Component:
         self.children.append(child)
         return self
 
+    def prepend(self, child: Union[str, "Component", list]):
+        """
+        Prepends a child element to the component.
+
+        :param child: A Component, string, or list of elements.
+        :return: The component instance (for method chaining).
+        """
+
+        self.children.insert(0, child)
+        return self
+
     def __build_attr__(self) -> str:
         return " " + " ".join(
-            f"{k}='{v}'" if v is not None else f"{k}" for k, v in self.attributes.items()
+            f"{k}='{v}'" if v is not None else f"{k}"
+            for k, v in self.attributes.items()
         )
 
     def __build_child__(self, children: list):
@@ -118,6 +151,10 @@ class Component:
                 html, css = child.build()
                 html_parts.append(html)
                 css_parts.append(css)
+            elif isinstance(child, JSCode):
+                # JSCode outside of an attribute should be a special tag {{jscode_name}}
+                print(f"JSCode: {child.raw}")
+                html_parts.append(f"{{{{{child.raw}}}}}")
             else:
                 try:
                     html_parts.append(str(child))

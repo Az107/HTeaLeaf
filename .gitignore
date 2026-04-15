@@ -7,4 +7,6 @@ src/.DS_Store
 */.DS_Store
 */__pycache__/
 /build
+HTeaLeaf.egg-info/*
 /src/TeaLeaf.egg-info
+src/HTeaLeaf.egg-info
