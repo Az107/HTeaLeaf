@@ -183,7 +183,7 @@ def home(session, req: HttpRequest):
                 ).row()
             ),
             button("toggle modal").attr(onclick=toggleModal()),
-            div("Esto es modal none: ", modal_state)
+            div("This is a modal: ", modal_state)
             .id("modal")
             .classes("card")
             .row()
