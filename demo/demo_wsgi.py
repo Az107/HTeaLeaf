@@ -1,16 +1,15 @@
 from demo.components import init
-from HTeaLeaf.Server.WSGI import WSGI
+from HTeaLeaf.Server import Server
+from HTeaLeaf.Server.adapter import WSGI
 
-app = WSGI()
+app = Server(WSGI)
 
-application = app.wsgi_app
 init(app)
-
 
 if __name__ == "__main__":
     from wsgiref.simple_server import make_server
 
-    with make_server("", 8000, application) as server:
+    with make_server("", 8000, app) as server:
         print("Serving on http://127.0.0.1:8000")
         try:
             server.serve_forever()

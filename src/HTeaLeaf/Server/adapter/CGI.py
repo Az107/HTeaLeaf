@@ -1,14 +1,15 @@
 import os
 import sys
+from types import FunctionType
 from urllib.parse import parse_qs
 
-from ..Elements import Component
-from .Server import Server
+from ..Http import Request, Response
 
 
-class CGI(Server):
-    def __init__(self) -> None:
-        super().__init__()
+def CGI(handler: FunctionType):
+    raise Exception("Not implemented")
+
+    def application(self) -> None:
         input_data = sys.stdin.read()
 
         query_string = os.environ.get("QUERY_STRING", "")
@@ -29,18 +30,22 @@ class CGI(Server):
         cgi_vars["SCRIPT_NAME"] = os.environ.get("SCRIPT_NAME", "")
         cgi_vars["SCRIPT_FILENAME"] = os.environ.get("SCRIPT_FILENAME", "")
 
-        self.method = method
-        self.server_vars = cgi_vars
-
-    def serve(self, payload: str | Component):
-        headers: dict[str, str] = dict()
-        for k in headers:
-            print(f"{k}: {headers[k]}")
+        request = Request(
+            method,
+        )
+        response: Response = handler(request)
+        for k in response.headers:
+            print(f"{k}: {response.headers[k]}")
         print("\r\n")
-        content = payload
-        if isinstance(payload, Component):
-            try:
-                content = payload.render()
-            except Exception:
-                print("<h1>500 Internal Server Error</h1>")
-        print(content)
+
+        # def serve(self, payload: str | Component):
+        #     headers: dict[str, str] = dict()
+        #     content = payload
+        #     if isinstance(payload, Component):
+        #         try:
+        #             content = payload.render()
+        #         except Exception:
+        #             print("<h1>500 Internal Server Error</h1>")
+        #     print(content)
+
+    return application

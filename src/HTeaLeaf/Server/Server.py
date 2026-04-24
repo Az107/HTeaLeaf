@@ -8,9 +8,7 @@ from typing import Callable
 from uuid import uuid4
 
 from ..Elements import Component
-from .Http.HttpHeader import Headers
-from .Http.HttpRequest import HttpRequest
-from .Http.HttpResponse import HttpResponse, HttpStatus
+from .Http import Headers, Request, Response, Status
 
 
 def path_to_regex(path: str) -> str:
@@ -121,13 +119,19 @@ class Server:
     HTTP server handling routing and session management.
     """
 
-    def __init__(self):
+    def __init__(self, adapter):
+        self.adapter = adapter(self.handle_request)
+        # rewrite __call__ to expose the correct func signature
+        self.__call__ = self.adapter
         self.routes = {}
         self.sessions: dict[str, Session] = {}
         self._hooks: dict[ServerEvent, list[Callable[..., None]]] = {
             event: [] for event in ServerEvent
         }
         self.add_path("/_engine/helper.js", return_helper)
+
+    def __call__(self, *args, **kwargs):
+        return self.adapter(*args, **kwargs)
 
     def registry_hook(self, event: ServerEvent, callback: Callable[..., None]):
         event_hooks = self._hooks.get(event)
@@ -182,8 +186,8 @@ class Server:
 
         return self.sessions[session_id], header_session_cookie
 
-    def __process_response__(self, response) -> HttpResponse:
-        res_code = HttpStatus.Ok
+    def __process_response__(self, response) -> Response:
+        res_code = Status.Ok
         res_headers = Headers()
         if isinstance(response, tuple):
             if len(response) == 3:
@@ -208,14 +212,14 @@ class Server:
             res_body = json.dumps(res_body)
 
         res_headers.add("Content-Type", content_type)
-        return HttpResponse(res_code, res_headers, res_body)
+        return Response(res_code, res_headers, res_body)
 
-    def handle_request(self, request: HttpRequest) -> HttpResponse:
+    def handle_request(self, request: Request) -> Response:
         handler_and_match = match_path(self.routes, request.path)
         self.__call_hook__(ServerEvent.on_request, request)
         if handler_and_match is None:
-            return HttpResponse(
-                HttpStatus.NotFound, [("Content-Type", "text/plain")], "Not Found"
+            return Response(
+                Status.NotFound, [("Content-Type", "text/plain")], "Not Found"
             )
 
         params, handler = handler_and_match

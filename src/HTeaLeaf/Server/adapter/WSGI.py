@@ -1,19 +1,16 @@
+from types import FunctionType
 from typing import Iterator
 
-from ..Elements import Component
-from .Http.HttpHeader import Headers
-from .Server import HttpRequest, Server
+from ..Http import Headers, Request
 
 
 def to_list(headers: Headers) -> list[tuple[str, str]]:
     return [h for h in headers]
 
 
-class WSGI(Server):
-    def __init__(self):
-        super().__init__()
+def WSGI(handler: FunctionType):
 
-    def wsgi_app(self, environ: dict[str, str], start_response) -> Iterator[bytes]:
+    def application(environ: dict[str, str], start_response) -> Iterator[bytes]:
         path = environ.get("PATH_INFO", "/")
         method = environ.get("REQUEST_METHOD", "GET")
         headers = {}
@@ -27,8 +24,8 @@ class WSGI(Server):
             if k.startswith("HTTP_"):
                 headers[k[5:]] = environ[k]
         body = environ.get("wsgi.input", "body")
-        request = HttpRequest(method, path, headers=headers, body=body)
-        response = self.handle_request(request)
+        request = Request(method, path, headers=headers, body=body)
+        response = handler(request)
         start_response(response.status.to_str(), to_list(response.headers))
         response_body: bytes = (
             response.body.encode("utf-8")
@@ -37,5 +34,4 @@ class WSGI(Server):
         )
         return iter([response_body])
 
-    def serve(self, payload: str | Component):
-        return super().serve(payload)
+    return application
