@@ -10,6 +10,8 @@ from uuid import uuid4
 from ..Elements import Component
 from .Http import Headers, Request, Response, Status
 
+COOKIE_NAME = "HTeaLeaf-Session"
+
 
 def path_to_regex(path: str) -> str:
     """
@@ -173,11 +175,11 @@ class Server:
 
     def __handle_session__(self, cookies: dict):
         header_session_cookie = None
-        if cookies.get("TeaLeaf-Session") is None:
+        if cookies.get(COOKIE_NAME) is None:
             session_id = self.__create_session__()
-            header_session_cookie = ("Set-Cookie", f"TeaLeaf-Session={session_id}")
+            header_session_cookie = ("Set-Cookie", f"{COOKIE_NAME}={session_id}")
         else:
-            session_id = cookies["TeaLeaf-Session"]
+            session_id = cookies[COOKIE_NAME]
             if self.sessions.get(session_id) is None:
                 self.sessions[session_id] = Session()
                 self.__call_hook__(

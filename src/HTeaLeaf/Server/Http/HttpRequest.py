@@ -1,9 +1,9 @@
-
 import io
 import json
 from typing import Any, Optional
 
 from .HttpHeader import Headers
+
 
 class HttpRequest:
     """
@@ -15,7 +15,7 @@ class HttpRequest:
         method: str = "GET",
         path: str = "/",
         args: dict[str, str] = {},
-        headers: list[tuple[str, str]] | dict[str,str] = [],
+        headers: list[tuple[str, str]] | dict[str, str] = [],
         body: str | bytes | io.BufferedReader | None = None,
     ):
 
@@ -29,7 +29,7 @@ class HttpRequest:
         return self.__body_to_text__()
 
     def __body_to_text__(self) -> str | None:
-        content_length =  self.headers.get("content-length")
+        content_length = self.headers.get("content-length")
         if content_length is None:
             return None
 
@@ -45,7 +45,7 @@ class HttpRequest:
             return self.body.decode("utf-8")
         elif isinstance(self.body, str):
             return self.body
-        elif hasattr(self.body, '__iter__'):
+        elif hasattr(self.body, "__iter__"):
             result = b"".join([d for d in iter(self.body)])
             return result.decode("utf-8")
         else:

@@ -15,9 +15,7 @@ def WSGI(handler: FunctionType):
         method = environ.get("REQUEST_METHOD", "GET")
         headers = {}
         try:
-            headers["content_length"] = int(
-                environ.get("CONTENT_LENGTH", 0)
-            )  # Puede ser None o vacío
+            headers["content_length"] = int(environ.get("CONTENT_LENGTH", 0))
         except ValueError:
             headers["content_length"] = 0
         for k in environ:

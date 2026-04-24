@@ -1,6 +1,7 @@
-from demo.components import init
 from HTeaLeaf.Server import Server
 from HTeaLeaf.Server.adapter import WSGI
+
+from .components import init
 
 app = Server(WSGI)
 
