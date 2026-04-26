@@ -1,13 +1,10 @@
 [project]
 name = "HTeaLeaf"
-version = "0.3.1"
+version = "0.3.2"
 description = "Declarative SSR Framework"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "gunicorn>=23.0.0",
-    "uvicorn>=0.38.0",
-]
+
 
 [build-system]
 requires = ["setuptools"]
