@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from types import FunctionType
 from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
 
+from HTeaLeaf.Server.adapter.adapter import adapter
+
 from ..Http import Headers, Request
 
 
@@ -55,33 +57,32 @@ def headers_to_list(headers: Headers):
     return header_list
 
 
-def ASGI(handler: FunctionType):
-    async def application(
-        scope: dict,
-        receive: Callable[[], Awaitable[dict]],
-        send: Callable[[Any], Awaitable[None]],
-    ):
-        body: bytes = bytes()
-        more = True
-        while more:
-            event = await receive()
-            more = event["more_body"]
-            body += event["body"]
-        headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
-        request = Request(scope["method"], scope["path"], headers=headers, body=body)
-        response = handler(request)
-        body = (
-            response.body.encode("utf-8")
-            if isinstance(response.body, str)
-            else response.body
+@adapter
+async def ASGI(
+    handler: FunctionType,
+    scope: dict,
+    receive: Callable[[], Awaitable[dict]],
+    send: Callable[[Any], Awaitable[None]],
+):
+    body: bytes = bytes()
+    more = True
+    while more:
+        event = await receive()
+        more = event["more_body"]
+        body += event["body"]
+    headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
+    request = Request(scope["method"], scope["path"], headers=headers, body=body)
+    response = handler(request)
+    body = (
+        response.body.encode("utf-8")
+        if isinstance(response.body, str)
+        else response.body
+    )
+
+    await send(
+        response_start(
+            response.status.to_int(), iter(headers_to_list(response.headers)), False
         )
+    )
 
-        await send(
-            response_start(
-                response.status.to_int(), iter(headers_to_list(response.headers)), False
-            )
-        )
-
-        await send(response_body(body))
-
-    return application
+    await send(response_body(body))

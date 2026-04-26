@@ -1,15 +1,15 @@
 import os
 import sys
 from types import FunctionType
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, parse_qsl
+
+from HTeaLeaf.Server.Http.HttpHeader import Headers
 
 from ..Http import Request, Response
+from .adapter import adapter
 
-
+@adapter
 def CGI(handler: FunctionType):
-    raise Exception("Not implemented")
-
-    def application(self) -> None:
         input_data = sys.stdin.read()
 
         query_string = os.environ.get("QUERY_STRING", "")
@@ -22,7 +22,7 @@ def CGI(handler: FunctionType):
         if method == "POST" and input_data:
             cgi_vars.update(parse_qs(input_data))
 
-        # Obtener algunas variables de entorno comunes
+
         cgi_vars["REQUEST_METHOD"] = method
         cgi_vars["CONTENT_TYPE"] = os.environ.get("CONTENT_TYPE", "")
         cgi_vars["QUERY_STRING"] = query_string
@@ -30,22 +30,23 @@ def CGI(handler: FunctionType):
         cgi_vars["SCRIPT_NAME"] = os.environ.get("SCRIPT_NAME", "")
         cgi_vars["SCRIPT_FILENAME"] = os.environ.get("SCRIPT_FILENAME", "")
 
+        SPECIAL = {"CONTENT_TYPE", "CONTENT_LENGTH"}
+
+        headers = {}
+        for key, value in os.environ.items():
+            if key in SPECIAL:
+                headers[key.replace("_", "-").title()] = value
+            elif key.startswith("HTTP_"):
+                headers[key[5:].replace("_", "-").title()] = value
         request = Request(
             method,
+            cgi_vars["PATH_INFO"],
+            dict(parse_qsl(query_string)),
+            headers,
+            input_data
         )
         response: Response = handler(request)
-        for k in response.headers:
-            print(f"{k}: {response.headers[k]}")
-        print("\r\n")
-
-        # def serve(self, payload: str | Component):
-        #     headers: dict[str, str] = dict()
-        #     content = payload
-        #     if isinstance(payload, Component):
-        #         try:
-        #             content = payload.render()
-        #         except Exception:
-        #             print("<h1>500 Internal Server Error</h1>")
-        #     print(content)
-
-    return application
+        for k,v in response.headers:
+            sys.stdout.buffer.write(f"{k}: {v}\n".encode())
+        sys.stdout.buffer.write(b"\r\n")
+        print(response.body)
