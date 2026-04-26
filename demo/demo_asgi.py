@@ -1,11 +1,11 @@
-from HTeaLeaf.Server.ASGI import ASGI
+from HTeaLeaf.Server.adapter.ASGI import ASGI
+from HTeaLeaf.Server.Server import Server
 
 from .components import init
 
-app = ASGI()
-
+app = Server(ASGI)
 init(app)
 
 
-async def application(scope, receive, send):
-    await app.application(scope, receive, send)
+# async def application(scope, receive, send):
+#     await app.application(scope, receive, send)

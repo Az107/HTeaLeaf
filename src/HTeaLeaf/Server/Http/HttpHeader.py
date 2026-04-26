@@ -1,11 +1,13 @@
 BANNED_HEADERS = []
 
-class Headers():
-    def __init__(self, data: list[tuple[str,str]] | dict[str,str] = []):
+
+class Headers:
+    def __init__(self, data: list[tuple[str, str]] | dict[str, str] = []):
         self._data: dict[str, str] = {}
         for k in data:
             if isinstance(k, str) and isinstance(data, dict):
-                self._data[k] = data[k]
+                key = k.replace("_", "-").lower()
+                self._data[key] = data[k]
             else:
                 self._data[k[0]] = k[1]
 
@@ -13,10 +15,8 @@ class Headers():
         for k in self._data:
             yield (k, self._data[k])
 
-
     def __getitem__(self, key: str):
         return self._data.get(key.lower())
-
 
     def __setitem__(self, name: str, value: str) -> None:
         if name.lower() in self._data:
@@ -34,7 +34,6 @@ class Headers():
             if k.lower() == key.lower():
                 return self._data.get(k)
         return None
-
 
     def __contains__(self, item):
         return item.lower() in self._data

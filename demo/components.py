@@ -17,7 +17,8 @@ from HTeaLeaf.Elements import (
 )
 from HTeaLeaf.JS import js
 from HTeaLeaf.JS.common import alert, document, window
-from HTeaLeaf.Server.Server import HttpRequest, Server, Session
+from HTeaLeaf.Server.Http import Request
+from HTeaLeaf.Server.Server import Server, Session
 from HTeaLeaf.Server.utils import redirect
 from HTeaLeaf.State.HelperMidleware import enable_reactivity
 from HTeaLeaf.State.LocalState import use_state
@@ -53,7 +54,7 @@ mincss_url = (
 mincss = link().attr(rel="stylesheet", href=mincss_url)
 
 
-def health(req: HttpRequest):
+def health(req: Request):
     return {
         "status": "ok",
         "method": req.method,
@@ -94,7 +95,7 @@ def LoginPage():
     )
 
 
-def user(session, req: HttpRequest):
+def user(session, req: Request):
     if session.has("userName"):
         return "Hello " + session.userName
     user = req.form()
@@ -105,7 +106,7 @@ def user(session, req: HttpRequest):
         return redirect("/")
 
 
-def userNav(req: HttpRequest):
+def userNav(req: Request):
     user = req.json()
     if user is None:
         name = ""
@@ -146,7 +147,7 @@ def logout(session):
     return redirect("/login")
 
 
-def home(session, req: HttpRequest):
+def home(session, req: Request):
     if not session.has("userName"):
         return redirect("/login")
 
