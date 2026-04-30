@@ -20,11 +20,10 @@ and HTeaLeaf takes care of keeping everything in sync automatically.
 ## 🚀 Quick Example
 
 ```python
-from HTeaLeaf.Server.WSGI import WSGI
-from HTeaLeaf.State.Store import Store, SuperStore
+from HTeaLeaf import Store, SuperStore, HTeaPot, adapters
 from HTeaLeaf.Elements import div, h3, button
 
-app = WSGI()
+app = HTeaPot(adapters.WSGI)
 SuperStore(app)
 
 counter = Store({"count": 0})
