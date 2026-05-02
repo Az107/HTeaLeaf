@@ -1,10 +1,8 @@
-from HTeaLeaf.Server import Server
-from HTeaLeaf.Server.adapter import WSGI
+from HTeaLeaf import HTeaLeaf, adapters
 
 from .components import init
 
-app = Server(WSGI)
-
+app = HTeaLeaf(adapters.WSGI)
 init(app)
 
 if __name__ == "__main__":

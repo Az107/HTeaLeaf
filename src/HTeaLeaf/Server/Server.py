@@ -8,6 +8,7 @@ from typing import Callable
 from uuid import uuid4
 
 from ..Elements import Component
+from .adapter import ASGI
 from .Http import Headers, Request, Response, Status
 
 COOKIE_NAME = "HTeaLeaf-Session"
@@ -121,7 +122,7 @@ class Server:
     HTTP server handling routing and session management.
     """
 
-    def __init__(self, adapter):
+    def __init__(self, adapter=ASGI):
         self.adapter = adapter(self.handle_request)
         # rewrite __call__ to expose the correct func signature
         self.__call__ = self.adapter

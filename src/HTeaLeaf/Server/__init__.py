@@ -1,3 +1,3 @@
-from .Server import Server
+from .Server import Server, Session
 
-__all__ = ["Server"]
+__all__ = ["Server", "Session"]
