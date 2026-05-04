@@ -66,13 +66,13 @@ def counter():
 
     return div(
         button("-").attr(
-            onclick=cstore._js.update(
+            onclick=cstore.js.update(
                 "counter", cstore.read("counter") - 1
             )  # TODO: remplace _js
         ),
         h3(cstore.react("counter")),
         button("+").attr(
-            onclick=cstore._js.update("counter", cstore.read("counter") + 1)
+            onclick=cstore.js.update("counter", cstore.read("counter") + 1)
         ),
     ).row()
 
@@ -128,12 +128,12 @@ def todoItem(id, task):
     return (
         div(
             checkbox(checked=task["done"]).attr(
-                onchange=todoStore._js.update(f"todo/{id}/done", not task["done"])
+                onchange=todoStore.js.update(f"todo/{id}/done", not task["done"])
             ),
             h2(task["value"]).style(text_overflow="ellipsis"),
             button("x")
             .classes("secondary")
-            .attr(onclick=todoStore._js.delete(f"todo/{id}")),
+            .attr(onclick=todoStore.js.delete(f"todo/{id}")),
         )
         .row()
         .classes("card")

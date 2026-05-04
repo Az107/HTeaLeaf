@@ -23,7 +23,7 @@ class SuperStore:
             for store_id in self.stores:
                 store = self.stores[store_id]
                 res_body.append(
-                    script(f'const {store._js} = new Store("{store._id}");')
+                    script(f'const {store.js} = new Store("{store._id}");')
                 )
 
     def __init__(self, server: Server | None = None):
@@ -79,7 +79,7 @@ class Store:
     def __init__(self, default={}, subscribe=True, id=str(uuid4())):
         self._id = id
         self.data = copy.copy(default)
-        self._js = JSCode(f"store_{self._id[:8]}")
+        self.js = JSCode(f"store_{self._id[:8]}")
         if subscribe:
             SuperStore().add(self._id, self)
 
@@ -164,7 +164,7 @@ class AuthStore:
         self.default = default
         self.data: dict[str, Store] = {}
         self.auth_func = auth
-        self._js = JSCode(f"store_{self._id[:8]}")
+        self.js = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
     def auth(self, session: Session) -> Store:
