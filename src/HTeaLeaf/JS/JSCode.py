@@ -132,6 +132,6 @@ def get_jscode_ids(all_vars) -> dict[str, str]:
         # LocalState y Store exponen .js (JSCode), cuyo .raw es el identificador JS
         if hasattr(var_val, "raw"):
             name_map[var_name] = var_val.raw
-        elif hasattr(var_val, "_js"):
-            name_map[var_name] = var_val._js.raw
+        elif hasattr(var_val, "js"):
+            name_map[var_name] = var_val.js.raw
     return name_map

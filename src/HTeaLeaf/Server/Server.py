@@ -8,6 +8,7 @@ from typing import Callable
 from uuid import uuid4
 
 from ..Elements import Component
+from ..Elements.Renderer import HTMLRenderer
 from .adapter import ASGI
 from .Http import Headers, Request, Response, Status
 
@@ -209,7 +210,8 @@ class Server:
         if isinstance(res_body, Component):
             content_type = "text/html"
             self.__call_hook__(ServerEvent.on_render, res_body)
-            res_body = res_body.render()
+            renderer = HTMLRenderer()
+            res_body = renderer.render(res_body)
         elif type(res_body) is dict or type(res_body) is list:
             content_type = "application/json"
             res_body = json.dumps(res_body)

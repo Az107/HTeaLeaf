@@ -183,18 +183,19 @@ def home(session, req: Request):
                 ).row()
             ),
             button("toggle modal").attr(onclick=toggleModal()),
-            div("This is a modal: ", modal_state)
+            div(
+                "This is a modal: ",
+                modal_state,
+                div(
+                    button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
+                    localCounter,
+                    button("+").attr(onclick=localCounter.set(localCounter.get() + 1)),
+                ).row(),
+            )
             .id("modal")
             .classes("card")
             .row()
             .style(inline=True, display=modal_state),
-            div(
-                button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
-                localCounter,
-                button("+").attr(onclick=localCounter.set(localCounter.get() + 1)),
-            )
-            .classes("card")
-            .row(),
             div(
                 counter(),
                 div(
