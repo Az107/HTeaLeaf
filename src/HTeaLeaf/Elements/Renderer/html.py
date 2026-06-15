@@ -3,6 +3,8 @@ from typing import Any
 from HTeaLeaf.JS.JSCode import JSCode
 
 from ..Component import Component
+from ..Elements import script
+from .render_context import get_render_ctx
 from .renderer import Renderer
 
 
@@ -36,6 +38,16 @@ class HTMLRenderer(Renderer[str]):
         cmpt: Component | list | str | JSCode | Any,
         subrender=False,
     ) -> str:
+
+        if not subrender:
+            ctx = get_render_ctx()
+            if ctx is not None and isinstance(cmpt, Component):
+                node = cmpt.get_child("head") or cmpt
+                for fn in ctx.js_functions:
+                    node.append(script(fn))
+                for fn in ctx.state_initializers:
+                    node.append(script(fn))
+
         html_parts = []
         if isinstance(cmpt, str):
             html_parts.append(f"{cmpt}")

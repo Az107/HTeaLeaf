@@ -62,6 +62,18 @@ class Component:
         self.attributes["class"] = classes
         return self
 
+    def get_child(self, name) -> "Component | None":
+        """
+        Returns the child component with the given name.
+
+        :param name: The name of the child component to retrieve.
+        :return: The child component instance, or None if not found.
+        """
+        for child in self.children:
+            if isinstance(child, Component) and child.name == name:
+                return child
+        return None
+
     def style(self, path: str | None = None, inline: bool = False, **attr):
         """
         Adds inline styles to the component.

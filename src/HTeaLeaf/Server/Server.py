@@ -8,7 +8,7 @@ from typing import Callable
 from uuid import uuid4
 
 from ..Elements import Component
-from ..Elements.Renderer import HTMLRenderer
+from ..Elements.Renderer import HTMLRenderer, init_render_ctx
 from .adapter import ASGI
 from .Http import Headers, Request, Response, Status
 
@@ -221,6 +221,7 @@ class Server:
 
     def handle_request(self, request: Request) -> Response:
         handler_and_match = match_path(self.routes, request.path)
+        init_render_ctx()
         self.__call_hook__(ServerEvent.on_request, request)
         if handler_and_match is None:
             return Response(
