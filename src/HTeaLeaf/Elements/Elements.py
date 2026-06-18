@@ -65,6 +65,26 @@ class script(Component):
         # else:
 
 
+class Table(Component, metaclass=ComponentMeta):
+    pass
+
+
+class td(Component, metaclass=ComponentMeta):
+    pass
+
+
+class tr(Component, metaclass=ComponentMeta):
+    pass
+
+
+class th(Component, metaclass=ComponentMeta):
+    pass
+
+
+class thead(Component, metaclass=ComponentMeta):
+    pass
+
+
 class style(Component, metaclass=ComponentMeta):
     pass
 

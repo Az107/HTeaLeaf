@@ -86,7 +86,7 @@ class JSCode:
 
 class JSFunction:
     def __init__(self, name: str, raw: str):
-        from ..State.RenderContext import get_render_ctx
+        from ..Elements import get_render_ctx
 
         super().__init__()
         self.name = name
@@ -132,6 +132,6 @@ def get_jscode_ids(all_vars) -> dict[str, str]:
         # LocalState y Store exponen .js (JSCode), cuyo .raw es el identificador JS
         if hasattr(var_val, "raw"):
             name_map[var_name] = var_val.raw
-        elif hasattr(var_val, "_js"):
-            name_map[var_name] = var_val._js.raw
+        elif hasattr(var_val, "js"):
+            name_map[var_name] = var_val.js.raw
     return name_map

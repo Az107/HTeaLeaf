@@ -62,6 +62,18 @@ class Component:
         self.attributes["class"] = classes
         return self
 
+    def get_child(self, name) -> "Component | None":
+        """
+        Returns the child component with the given name.
+
+        :param name: The name of the child component to retrieve.
+        :return: The child component instance, or None if not found.
+        """
+        for child in self.children:
+            if isinstance(child, Component) and child.name == name:
+                return child
+        return None
+
     def style(self, path: str | None = None, inline: bool = False, **attr):
         """
         Adds inline styles to the component.
@@ -130,85 +142,6 @@ class Component:
 
         self.children.insert(0, child)
         return self
-
-    def __build_attr__(self) -> str:
-        return " " + " ".join(
-            f"{k}='{v}'" if v is not None else f"{k}"
-            for k, v in self.attributes.items()
-        )
-
-    def __build_child__(self, children: list):
-        html_parts = []
-        css_parts = []
-        for child in children:
-            if isinstance(child, str):
-                html_parts.append(f"{child}")
-            elif isinstance(child, list):
-                html, css = self.__build_child__(child)
-                html_parts.append(html)
-                css_parts.append(css)
-            elif isinstance(child, Component):
-                html, css = child.build()
-                html_parts.append(html)
-                css_parts.append(css)
-            elif isinstance(child, JSCode):
-                # JSCode outside of an attribute should be a special tag {{jscode_name}}
-                print(f"JSCode: {child.raw}")
-                html_parts.append(f"{{{{{child.raw}}}}}")
-            else:
-                try:
-                    html_parts.append(str(child))
-                except Exception:
-                    continue
-        return "".join(html_parts), "".join(filter(None, css_parts))
-
-    def build(self) -> tuple[str, str]:
-        """
-        Builds the component's HTML and CSS separately.
-
-        :return: A tuple (HTML string, CSS string)
-        """
-
-        if self.styles is not None and "id" not in self.attributes:
-            self.attr(id=self._id)
-        if len(self.children) == 0:
-            result = f"<{self.name}{self.__build_attr__()}/>\n"
-        else:
-            endln = "\n" if len(self.children) > 1 else ""
-            result = f"<{self.name}{self.__build_attr__()}>{endln}"
-            html, styles = self.__build_child__(self.children)
-            result += html
-            if self.styles is None:
-                self.styles = styles
-            else:
-                self.styles += styles
-            result += f"\t</{self.name}>\n"
-        css: str = "" if self.styles is None else self.styles
-        return result, css
-
-    def render(self) -> str:
-        """
-        Builds and returns the full HTML including inline CSS inside a <style> tag.
-
-        :return: A complete HTML string with embedded CSS.
-        """
-
-        if len(self.children) == 0:
-            result = f"<{self.name}{self.__build_attr__()}/>\n"
-        else:
-            inner_result, css = self.__build_child__(self.children)
-            if self.styles is None:
-                self.styles = css
-            else:
-                self.styles += css
-                self.styles += "\n"
-            result = f"<{self.name}{self.__build_attr__()}>\n"
-            if self.styles is not None:
-                result += f"<style>{self.styles}</style>\n"
-            result += inner_result
-            result += f"</{self.name}>\n"
-
-        return result
 
 
 class ComponentMeta(type):
