@@ -9,6 +9,7 @@ from uuid import uuid4
 
 from ..Elements import Component
 from ..Elements.Renderer import HTMLRenderer, init_render_ctx
+from ..State.HelperMidleware import insert_helper_script
 from .adapter import ASGI
 from .Http import Headers, Request, Response, Status
 
@@ -133,11 +134,15 @@ class Server:
             event: [] for event in ServerEvent
         }
         self.add_path("/_engine/helper.js", return_helper)
+        self.registry_hook(ServerEvent.on_response, insert_helper_script)
 
     def __call__(self, *args, **kwargs):
         return self.adapter(*args, **kwargs)
 
     def registry_hook(self, event: ServerEvent, callback: Callable[..., None]):
+        if callback in self._hooks:
+            return
+
         event_hooks = self._hooks.get(event)
         if event_hooks is None:
             raise Exception("event dont exist")

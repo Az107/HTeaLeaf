@@ -21,7 +21,7 @@ from HTeaLeaf.JS.common import alert, document, window
 from HTeaLeaf.Server import Server, Session
 from HTeaLeaf.Server.Http import Request
 from HTeaLeaf.Server.utils import redirect
-from HTeaLeaf.State import enable_reactivity
+
 
 
 def auth_session(session: Session):
@@ -34,7 +34,7 @@ def init(app: Server):
     global cstore
     global todoStore
 
-    enable_reactivity(app)
+
     SuperStore(app)
     cstore = Store({"counter": 1})
     todoStore = AuthStore(auth_session, {"todo": []})
