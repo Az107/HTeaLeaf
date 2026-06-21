@@ -4,7 +4,7 @@ from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
 
 from HTeaLeaf.Server.adapter.adapter import adapter
 
-from ..Http import Headers, Request
+from ..Http import Headers, Request, Response
 
 
 @dataclass
@@ -59,7 +59,7 @@ def headers_to_list(headers: Headers):
 
 @adapter
 async def ASGI(
-    handler: FunctionType,
+    handler: Callable[[Request], Awaitable[Response]],
     scope: dict,
     receive: Callable[[], Awaitable[dict]],
     send: Callable[[Any], Awaitable[None]],
@@ -72,7 +72,7 @@ async def ASGI(
         body += event["body"]
     headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
     request = Request(scope["method"], scope["path"], headers=headers, body=body)
-    response = handler(request)
+    response = await handler(request)
     body = (
         response.body.encode("utf-8")
         if isinstance(response.body, str)

@@ -85,7 +85,7 @@ def greet(name):
     )
 
 
-def LoginPage():
+async def LoginPage():
     return html(
         mincss,
         form(textInput().id("userName").attr(name="userName"), submit("Login"))
@@ -94,18 +94,18 @@ def LoginPage():
     )
 
 
-def user(session, req: Request):
+async def user(session, req: Request):
     if session.has("userName"):
         return "Hello " + session.userName
     user = req.form()
     if user is None or "userName" not in user:
-        return 401, LoginPage()
+        return 401, await LoginPage()
     else:
         session.userName = user["userName"]
         return redirect("/")
 
 
-def userNav(req: Request):
+async def userNav(req: Request):
     user = req.json()
     if user is None:
         name = ""
@@ -146,7 +146,7 @@ def logout(session):
     return redirect("/login")
 
 
-def home(session, req: Request):
+async def home(session, req: Request):
     if not session.has("userName"):
         return redirect("/login")
 
