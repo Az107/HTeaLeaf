@@ -1,5 +1,5 @@
 from typing import Any
-
+import inspect
 from HTeaLeaf.JS.JSCode import JSCode
 
 from ..Component import Component
@@ -38,6 +38,13 @@ class HTMLRenderer(Renderer[str]):
         cmpt: Component | list | str | JSCode | Any,
         subrender=False,
     ) -> str:
+
+        if inspect.iscoroutine(cmpt):
+            raise Exception(
+                "Component returned a coroutine — did you forget 'await'?\n"
+                f"  handler returned: {cmpt.__name__}\n"
+                f"  hint: change 'return {cmpt.__name__}()' to 'return await {cmpt.__name__}()'"
+            )
 
         if not subrender:
             ctx = get_render_ctx()

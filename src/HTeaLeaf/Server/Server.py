@@ -6,6 +6,8 @@ import typing
 from enum import Enum
 from typing import Callable
 from uuid import uuid4
+import asyncio
+import functools
 
 from ..Elements import Component
 from ..Elements.Renderer import HTMLRenderer, init_render_ctx
@@ -224,7 +226,7 @@ class Server:
         res_headers.add("Content-Type", content_type)
         return Response(res_code, res_headers, res_body)
 
-    def handle_request(self, request: Request) -> Response:
+    async def handle_request(self, request: Request) -> Response:
         handler_and_match = match_path(self.routes, request.path)
         init_render_ctx()
         self.__call_hook__(ServerEvent.on_request, request)
@@ -245,7 +247,16 @@ class Server:
         params["cookies"] = cookies
         sig = inspect.signature(handler)
         params = {k: v for k, v in params.items() if k in sig.parameters}
-        response = handler(**params)
+        if inspect.iscoroutinefunction(handler):
+            print("using await in handler")
+            response = await handler(**params)
+
+        else:
+            print("NOT using await in handler")
+            response = handler(**params) # Run syncronously for now
+            # response = await asyncio.get_event_loop().run_in_executor(None, functools.partial(handler, **params))
+
+
         response = self.__process_response__(response)
         if session_header is not None:
             response.headers.add(session_header[0], session_header[1])
