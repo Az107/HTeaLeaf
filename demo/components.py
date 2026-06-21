@@ -17,7 +17,7 @@ from HTeaLeaf.Elements import (
     textInput,
 )
 from HTeaLeaf.JS import js
-from HTeaLeaf.JS.common import alert, document, window
+from HTeaLeaf.JS.common import alert, document, window, event, console
 from HTeaLeaf.Server import Server, Session
 from HTeaLeaf.Server.Http import Request
 from HTeaLeaf.Server.utils import redirect
@@ -162,6 +162,14 @@ def home(session, req: Request):
         else:
             alert("empty task")
 
+
+    @js
+    def addOnKeyPress(e):
+        console.log(e.key)
+        if e.key == "Enter" or e.keyCode == 13:
+            addTodoIfNotEmpty("todo_item")
+
+
     @js
     def toggleModal():
         if modal_state.get() == "none":
@@ -205,7 +213,7 @@ def home(session, req: Request):
                     ]
                 ).style(padding="20px", height="200px", overflow_y="scroll"),
                 div(
-                    textInput().id("todo_item"),
+                    textInput().id("todo_item").attr(onkeyup=addOnKeyPress(event)),
                     button("Create").attr(onclick=addTodoIfNotEmpty("todo_item")),
                 ).row(),
             ),

@@ -1,8 +1,8 @@
-from HTeaLeaf import htealeaf, adapters
+from HTeaLeaf import HteaLeaf, adapters
 
 from .components import init
 
-app = htealeaf(adapters.WSGI)
+app = HteaLeaf(adapters.WSGI)
 
 init(app)
 

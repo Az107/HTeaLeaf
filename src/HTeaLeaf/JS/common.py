@@ -41,3 +41,4 @@ def Lt(code: JSCode, other: Any):
 console = JSCode("console")
 window = JSCode("window")
 alert = JSCode("alert")
+event = JSCode("event")
