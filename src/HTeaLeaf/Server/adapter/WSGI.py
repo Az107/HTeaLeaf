@@ -1,16 +1,17 @@
+import asyncio
 from types import FunctionType
-from typing import Iterator
+from typing import Iterator, Callable, Awaitable
 
 from HTeaLeaf.Server.adapter.adapter import adapter
 
-from ..Http import Headers, Request
+from ..Http import Headers, Request, Response
 
 
 def to_list(headers: Headers) -> list[tuple[str, str]]:
     return [h for h in headers]
 
 @adapter
-def WSGI(handler: FunctionType,environ: dict[str, str], start_response) -> Iterator[bytes]:
+def WSGI(handler: Callable[[Request], Awaitable[Response]],environ: dict[str, str], start_response) -> Iterator[bytes]:
     path = environ.get("PATH_INFO", "/")
     method = environ.get("REQUEST_METHOD", "GET")
     headers = {}
@@ -23,7 +24,7 @@ def WSGI(handler: FunctionType,environ: dict[str, str], start_response) -> Itera
             headers[k[5:]] = environ[k]
     body = environ.get("wsgi.input", "body")
     request = Request(method, path, headers=headers, body=body)
-    response = handler(request)
+    response = asyncio.run(handler(request))
     start_response(response.status.to_str(), to_list(response.headers))
     response_body: bytes = (
         response.body.encode("utf-8")
