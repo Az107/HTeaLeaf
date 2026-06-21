@@ -248,11 +248,9 @@ class Server:
         sig = inspect.signature(handler)
         params = {k: v for k, v in params.items() if k in sig.parameters}
         if inspect.iscoroutinefunction(handler):
-            print("using await in handler")
             response = await handler(**params)
 
         else:
-            print("NOT using await in handler")
             response = handler(**params) # Run syncronously for now
             # response = await asyncio.get_event_loop().run_in_executor(None, functools.partial(handler, **params))
 
