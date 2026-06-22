@@ -68,10 +68,14 @@ async def ASGI(
     more = True
     while more:
         event = await receive()
-        more = event["more_body"]
+        more = event.get("more_body", False)
         body += event["body"]
+    path = scope["path"]
+    root = scope.get("root_path", "")
+    if root and path.startswith(root):
+        path = path[len(root) :] or "/"
     headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
-    request = Request(scope["method"], scope["path"], headers=headers, body=body)
+    request = Request(scope["method"], path, headers=headers, body=body)
     response = handler(request)
     body = (
         response.body.encode("utf-8")
