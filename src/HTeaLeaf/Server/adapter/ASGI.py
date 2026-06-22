@@ -69,7 +69,7 @@ async def ASGI(
     while more:
         event = await receive()
         more = event.get("more_body", False)
-        body += event["body"]
+        body += event.get("body", b"")
     path = scope["path"]
     root = scope.get("root_path", "")
     if root and path.startswith(root):
