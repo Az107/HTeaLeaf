@@ -1,7 +1,5 @@
-import io
 import json
-from typing import Any, Optional, Callable, Awaitable
-
+from typing import Any, Awaitable, Callable, Optional
 
 from .header import Headers
 
@@ -19,7 +17,7 @@ class HttpRequest:
         headers: list[tuple[str, str]] | dict[str, str] = [],
         body: bytes | None = None,
         body_handler: Callable[[], Awaitable[dict[str, Any]]] | None = None,
-        is_ssl: bool = False
+        is_ssl: bool = False,
     ):
 
         self.method: str = method
@@ -44,34 +42,20 @@ class HttpRequest:
             if not event.get("more_body", False):
                 break
 
-
-
-
     def text(self) -> str | None:
-        return self.__body_to_text__()
-
-    def __body_to_text__(self) -> str | None:
-        content_length = self.headers.get("content-length")
-        if content_length is None:
+        if self.body is None:
             return None
+        return self.body.decode("utf-8")
 
-        body_size = int(content_length or 0)
-        if body_size == 0 or self.body is None:
-            return None
-        if isinstance(self.body, io.BufferedReader):
-            if not self.body.closed and self.body.readable():
-                return self.body.read(body_size).decode("utf-8")
-            else:
-                return None
-        elif isinstance(self.body, bytes):
-            return self.body.decode("utf-8")
-        elif isinstance(self.body, str):
-            return self.body
-        elif hasattr(self.body, "__iter__"):
-            result = b"".join([d for d in iter(self.body)])
-            return result.decode("utf-8")
-        else:
-            raise ValueError(f"Invalid body type: {type(self.body)}")
+    # def multipart(self) -> dict[str, str] | None:
+    #     if self._type is None or not self._type.startswith("multipart/form-data"):
+    #         return None
+    #     if self._raw is None:
+    #         return None
+
+    #     separator = self._type.split("boundary=")[1].encode()
+
+    #     result = {}
 
     def form(self) -> dict[str, str] | None:
         """
@@ -80,8 +64,9 @@ class HttpRequest:
         Returns:
             dict[str, str] | None: A dictionary of form values or None if invalid.
         """
-
-        body = self.__body_to_text__()
+        if self.body is None:
+            return None
+        body = self.body.decode("utf-8")
         if body is None:
             return None
         return dict(item.split("=", 1) for item in body.split("&") if "=" in item)
@@ -94,10 +79,14 @@ class HttpRequest:
             dict | None: A dictionary representation of the JSON body or None if invalid.
         """
 
-        body = self.__body_to_text__()
-        if body is None:
+        if self.body is None:
             return None
+        body = self.body.decode("utf-8")
+
         try:
             return json.loads(body)
         except (json.JSONDecodeError, AttributeError):
             return None
+
+
+# body transform
