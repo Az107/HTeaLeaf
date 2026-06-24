@@ -70,6 +70,11 @@ async def ASGI(
         more = event["more_body"]
         body += event["body"]
     headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
+    path = scope["path"]
+    root = scope.get("root_path", "")
+    if root and path.startswith(root):
+        path = path[len(root) :] or "/"
+
     args_kv = scope["query_string"].decode().split("&") if scope["query_string"] else []
     args = {}
     for kv in args_kv:
