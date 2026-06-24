@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from types import FunctionType
 from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
 
 from HTeaLeaf.Server.adapter.adapter import adapter
@@ -71,7 +70,13 @@ async def ASGI(
         more = event["more_body"]
         body += event["body"]
     headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
-    request = Request(scope["method"], scope["path"], headers=headers, body=body)
+    args_kv = scope["query_string"].decode().split("&") if scope["query_string"] else []
+    args = {}
+    for kv in args_kv:
+        k, v = kv.split("=", 1)
+        args[k] = v
+    request = Request(scope["method"], path, args=args, headers=headers, body=body)
+
     response = await handler(request)
     body = (
         response.body.encode("utf-8")
