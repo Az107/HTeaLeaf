@@ -64,11 +64,9 @@ async def ASGI(
     send: Callable[[Any], Awaitable[None]],
 ):
     body: bytes = bytes()
-    more = True
-    while more:
-        event = await receive()
-        more = event["more_body"]
-        body += event["body"]
+    event = await receive()
+    more_body = event.get("more_body",False)
+    body = event["body"]
     headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
     path = scope["path"]
     root = scope.get("root_path", "")
@@ -80,7 +78,8 @@ async def ASGI(
     for kv in args_kv:
         k, v = kv.split("=", 1)
         args[k] = v
-    request = Request(scope["method"], path, args=args, headers=headers, body=body)
+    body_handler = receive if more_body else None
+    request = Request(scope["method"], path, args=args, headers=headers, body=body, body_handler=body_handler)
 
     response = await handler(request)
     body = (

@@ -22,7 +22,7 @@ def WSGI(handler: Callable[[Request], Awaitable[Response]],environ: dict[str, st
     for k in environ:
         if k.startswith("HTTP_"):
             headers[k[5:]] = environ[k]
-    body = environ.get("wsgi.input", "body")
+    body = environ.get("wsgi.input", "body").encode()
     request = Request(method, path, headers=headers, body=body)
     response = asyncio.run(handler(request))
     start_response(response.status.to_str(), to_list(response.headers))
