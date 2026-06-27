@@ -1,6 +1,9 @@
 import io
 import json
-from typing import Any, Optional
+from typing import Any, Optional, Callable, Awaitable
+
+
+from HTeaLeaf.Elements.Elements import body
 
 from .HttpHeader import Headers
 
@@ -16,14 +19,33 @@ class HttpRequest:
         path: str = "/",
         args: dict[str, str] = {},
         headers: list[tuple[str, str]] | dict[str, str] = [],
-        body: str | bytes | io.BufferedReader | None = None,
+        body: bytes | None = None,
+        body_handler: Callable[[], Awaitable[dict[str, Any]]] | None = None,
     ):
 
         self.method: str = method
         self.path: str = path
         self.args: dict[str, str] = args
         self.headers: Headers = Headers(headers)
-        self.body: str | bytes | io.BufferedReader | Any | None = body
+        self.body: bytes | None = body
+        self._body_handler = body_handler
+        self.is_stream = body_handler is not None
+
+    async def stream(self):
+
+        yield self.body
+
+        if self._body_handler is None:
+            return
+
+        while True:
+            event = await self._body_handler()
+            yield event["body"]
+            if not event.get("more_body", False):
+                break
+
+
+
 
     def text(self) -> str | None:
         return self.__body_to_text__()

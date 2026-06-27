@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-from types import FunctionType
 from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
 
 from HTeaLeaf.Server.adapter.adapter import adapter
 
-from ..Http import Headers, Request
+from ..Http import Headers, Request, Response
 
 
 @dataclass
@@ -59,20 +58,30 @@ def headers_to_list(headers: Headers):
 
 @adapter
 async def ASGI(
-    handler: FunctionType,
+    handler: Callable[[Request], Awaitable[Response]],
     scope: dict,
     receive: Callable[[], Awaitable[dict]],
     send: Callable[[Any], Awaitable[None]],
 ):
     body: bytes = bytes()
-    more = True
-    while more:
-        event = await receive()
-        more = event["more_body"]
-        body += event["body"]
+    event = await receive()
+    more_body = event.get("more_body",False)
+    body = event["body"]
     headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
-    request = Request(scope["method"], scope["path"], headers=headers, body=body)
-    response = handler(request)
+    path = scope["path"]
+    root = scope.get("root_path", "")
+    if root and path.startswith(root):
+        path = path[len(root) :] or "/"
+
+    args_kv = scope["query_string"].decode().split("&") if scope["query_string"] else []
+    args = {}
+    for kv in args_kv:
+        k, v = kv.split("=", 1)
+        args[k] = v
+    body_handler = receive if more_body else None
+    request = Request(scope["method"], path, args=args, headers=headers, body=body, body_handler=body_handler)
+
+    response = await handler(request)
     body = (
         response.body.encode("utf-8")
         if isinstance(response.body, str)
