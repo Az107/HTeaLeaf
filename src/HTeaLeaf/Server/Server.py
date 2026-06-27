@@ -228,7 +228,7 @@ class Server:
 
     async def handle_request(self, request: Request) -> Response:
         handler_and_match = match_path(self.routes, request.path)
-        init_render_ctx()
+        reset = init_render_ctx()
         self.__call_hook__(ServerEvent.on_request, request)
         if handler_and_match is None:
             return Response(
@@ -247,15 +247,17 @@ class Server:
         params["cookies"] = cookies
         sig = inspect.signature(handler)
         params = {k: v for k, v in params.items() if k in sig.parameters}
-        if inspect.iscoroutinefunction(handler):
-            response = await handler(**params)
+        try:
+            if inspect.iscoroutinefunction(handler):
+                response = await handler(**params)
+            else:
+                # response = handler(**params) # Run syncronously for now
+                response = await asyncio.get_event_loop().run_in_executor(None, functools.partial(handler, **params))
 
-        else:
-            response = handler(**params) # Run syncronously for now
-            # response = await asyncio.get_event_loop().run_in_executor(None, functools.partial(handler, **params))
+            response = self.__process_response__(response)
+        finally:
+            reset()
 
-
-        response = self.__process_response__(response)
         if session_header is not None:
             response.headers.add(session_header[0], session_header[1])
         return response

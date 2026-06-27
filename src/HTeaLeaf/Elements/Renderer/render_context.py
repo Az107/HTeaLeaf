@@ -1,11 +1,12 @@
 # thread-local render context
 import threading
-
 # from ...Server.Server import Server, ServerEvent
+from contextvars import ContextVar
+from typing import Callable
 from ..Elements import Component, script
 
-_render_ctx = threading.local()
-
+# _render_ctx = threading.local()
+_render_ctx: ContextVar[RenderContext | None] = ContextVar('_render_ctx', default=None)
 
 class RenderContext:
     def __init__(self):
@@ -51,11 +52,15 @@ def _inject_context(node: Component):
 
 
 def get_render_ctx() -> RenderContext | None:
-    return getattr(_render_ctx, "current", None)
+    return _render_ctx.get()
 
+def init_render_ctx() -> Callable:
+    token = _render_ctx.set(RenderContext())
+    def reset():
+        _render_ctx.reset(token)
 
-def init_render_ctx():
-    _render_ctx.current = RenderContext()
+    return reset
+
 
 
 # def enable_render_context(server: "Server"):
