@@ -16,6 +16,7 @@ from HTeaLeaf.Elements import (
     submit,
     textInput,
 )
+from HTeaLeaf.Elements.Elements import style
 from HTeaLeaf.JS import js
 from HTeaLeaf.JS.common import alert, document, window, event, console
 from HTeaLeaf.Server import Server, Session
@@ -180,6 +181,7 @@ async def home(session, req: Request):
     web = html(
         head(
             mincss,
+            style({"body": {"background-color": "teal"}, "#modal": {"position": "fixed", "z-index": "1", "top": "20%","left": "20%"}})
         ),
         body(
             header(
