@@ -36,6 +36,7 @@ class head(Component, metaclass=ComponentMeta):
     pass
 
 
+
 class header(Component, metaclass=ComponentMeta):
     pass
 
@@ -43,6 +44,50 @@ class header(Component, metaclass=ComponentMeta):
 class link(Component, metaclass=ComponentMeta):
     def __init__(self, *childs):
         super().__init__("link", *childs)
+
+class style(Component):
+    def __init__(self, styles: dict[str,dict[str,str]] | str, href: str|None = None):
+        if href:
+           return  link().attr(rel="stylesheet", href=href)
+
+        content = ""
+        if isinstance(styles, dict):
+            for k in styles:
+                content += style._parse_block_(k,styles[k])
+        else:
+            content = styles
+
+        super().__init__("style", content)
+
+
+    @staticmethod
+    def _parse_block_(selector: str, content: dict) -> str:
+        props = {}
+        children = {}
+
+        for k, v in content.items():
+            if isinstance(v, dict):
+                children[k] = v
+            else:
+                props[k] = v
+
+        result = ""
+
+        if props:
+            result += f"{selector} {{\n"
+            for k, v in props.items():
+                result += f"\t{k.replace('_', '-')}: {v};\n"
+            result += "}\n"
+
+        for child_selector, child_content in children.items():
+            # Si empieza por & es concatenación, si no es descendiente
+            if child_selector.startswith("&"):
+                full_selector = selector + child_selector[1:]
+            else:
+                full_selector = f"{selector} {child_selector}"
+            result += style._parse_block_(full_selector, child_content)
+
+        return result
 
 
 class script(Component):
@@ -84,9 +129,6 @@ class th(Component, metaclass=ComponentMeta):
 class thead(Component, metaclass=ComponentMeta):
     pass
 
-
-class style(Component, metaclass=ComponentMeta):
-    pass
 
 
 class body(Component, metaclass=ComponentMeta):
