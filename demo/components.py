@@ -18,13 +18,13 @@ from HTeaLeaf.Elements import (
 )
 from HTeaLeaf.JS import js
 from HTeaLeaf.JS.common import alert, document, window, event, console
-from HTeaLeaf.Server import Server, Session
+from HTeaLeaf.Server import Server, Session, SessionData
 from HTeaLeaf.Server.Http import Request
 from HTeaLeaf.Server.utils import redirect
 
 
 
-def auth_session(session: Session):
+def auth_session(session: SessionData):
     if session.has("userName"):
         return session["userName"]
     return None

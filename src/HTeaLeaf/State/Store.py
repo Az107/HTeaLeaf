@@ -6,7 +6,8 @@ from uuid import uuid4
 from ..Elements import Component, div, script
 from ..JS import JSCode
 from ..Server.Http import Request
-from ..Server.Server import Server, ServerEvent, Session
+from ..Server.Server import Server, ServerEvent
+from ..Server.session import SessionData
 
 
 class SuperStore:
@@ -42,7 +43,7 @@ class SuperStore:
     def add(self, id, store: "Store | AuthStore"):
         self.stores[id] = store
 
-    def process(self, session: Session, req: Request, api_id):
+    def process(self, session: SessionData, req: Request, api_id):
         path = req.path.removeprefix(f"/api/_store/{api_id}/")
 
         store = self.stores.get(api_id)
@@ -167,7 +168,7 @@ class AuthStore:
         self.js = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
-    def auth(self, session: Session) -> Store:
+    def auth(self, session: SessionData) -> Store:
         key = self.auth_func(session)
         if key not in self.data:
             self.data[key] = Store(

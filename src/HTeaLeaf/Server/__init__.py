@@ -1,3 +1,4 @@
-from .Server import Server, Session
+from .Server import Server
+from .session import Session, SessionData
 
-__all__ = ["Server", "Session"]
+__all__ = ["Server", "Session", "SessionData"]
