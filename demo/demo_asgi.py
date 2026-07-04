@@ -1,4 +1,4 @@
-from HTeaLeaf import adapters, HteaLeaf
+from htealeaf import adapters, HteaLeaf
 
 from .components import init
 

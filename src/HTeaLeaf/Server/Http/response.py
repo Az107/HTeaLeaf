@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from .HttpHeader import Headers
+from .header import Headers
 
 
 class HttpResponse:

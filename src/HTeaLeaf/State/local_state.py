@@ -2,8 +2,8 @@ import hashlib
 import inspect
 import json
 
-from ..Elements import get_render_ctx
-from ..JS import JSCode
+from ..elements import get_render_ctx
+from ..js import JSCode
 
 
 class LocalState(JSCode):

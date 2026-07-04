@@ -1,4 +1,4 @@
-from ..Elements import Component, script
+from ..elements import Component, script
 
 
 
