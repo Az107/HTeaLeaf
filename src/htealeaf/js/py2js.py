@@ -5,6 +5,7 @@ from typing import Optional
 # Scope
 # ---------------------------------------------------------------------------
 
+
 class Scope:
     """Tracks declared variables per lexical scope."""
 
@@ -25,8 +26,8 @@ class Scope:
 # Transpiler
 # ---------------------------------------------------------------------------
 
-class PythonToJS(ast.NodeVisitor):
 
+class PythonToJS(ast.NodeVisitor):
     def __init__(self, replace_map: dict[str, str] = {}) -> None:
         super().__init__()
         self.replace_map = replace_map
@@ -256,38 +257,77 @@ class PythonToJS(ast.NodeVisitor):
         return " ".join(parts)
 
     # Arithmetic ops
-    def visit_Add(self, node: ast.Add) -> str:         return "+"
-    def visit_Sub(self, node: ast.Sub) -> str:         return "-"
-    def visit_Mult(self, node: ast.Mult) -> str:       return "*"
-    def visit_Div(self, node: ast.Div) -> str:         return "/"
-    def visit_Mod(self, node: ast.Mod) -> str:         return "%"
-    def visit_FloorDiv(self, node: ast.FloorDiv) -> str: return "/"  # handled in BinOp
-    def visit_Pow(self, node: ast.Pow) -> str:         return "**"   # handled in BinOp
+    def visit_Add(self, node: ast.Add) -> str:
+        return "+"
+
+    def visit_Sub(self, node: ast.Sub) -> str:
+        return "-"
+
+    def visit_Mult(self, node: ast.Mult) -> str:
+        return "*"
+
+    def visit_Div(self, node: ast.Div) -> str:
+        return "/"
+
+    def visit_Mod(self, node: ast.Mod) -> str:
+        return "%"
+
+    def visit_FloorDiv(self, node: ast.FloorDiv) -> str:
+        return "/"  # handled in BinOp
+
+    def visit_Pow(self, node: ast.Pow) -> str:
+        return "**"  # handled in BinOp
 
     # Unary ops
-    def visit_USub(self, node: ast.USub) -> str:       return "-"
-    def visit_UAdd(self, node: ast.UAdd) -> str:       return "+"
-    def visit_Not(self, node: ast.Not) -> str:         return "!"
-    def visit_Invert(self, node: ast.Invert) -> str:   return "~"
+    def visit_USub(self, node: ast.USub) -> str:
+        return "-"
+
+    def visit_UAdd(self, node: ast.UAdd) -> str:
+        return "+"
+
+    def visit_Not(self, node: ast.Not) -> str:
+        return "!"
+
+    def visit_Invert(self, node: ast.Invert) -> str:
+        return "~"
 
     # Comparison ops
-    def visit_Eq(self, node: ast.Eq) -> str:           return "==="
-    def visit_NotEq(self, node: ast.NotEq) -> str:     return "!=="
-    def visit_Lt(self, node: ast.Lt) -> str:           return "<"
-    def visit_LtE(self, node: ast.LtE) -> str:        return "<="
-    def visit_Gt(self, node: ast.Gt) -> str:           return ">"
-    def visit_GtE(self, node: ast.GtE) -> str:        return ">="
-    def visit_Is(self, node: ast.Is) -> str:           return "==="
-    def visit_IsNot(self, node: ast.IsNot) -> str:    return "!=="
+    def visit_Eq(self, node: ast.Eq) -> str:
+        return "==="
+
+    def visit_NotEq(self, node: ast.NotEq) -> str:
+        return "!=="
+
+    def visit_Lt(self, node: ast.Lt) -> str:
+        return "<"
+
+    def visit_LtE(self, node: ast.LtE) -> str:
+        return "<="
+
+    def visit_Gt(self, node: ast.Gt) -> str:
+        return ">"
+
+    def visit_GtE(self, node: ast.GtE) -> str:
+        return ">="
+
+    def visit_Is(self, node: ast.Is) -> str:
+        return "==="
+
+    def visit_IsNot(self, node: ast.IsNot) -> str:
+        return "!=="
 
     # Boolean ops
-    def visit_And(self, node: ast.And) -> str:         return "&&"
-    def visit_Or(self, node: ast.Or) -> str:           return "||"
+    def visit_And(self, node: ast.And) -> str:
+        return "&&"
+
+    def visit_Or(self, node: ast.Or) -> str:
+        return "||"
 
 
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 def transpile(source: str, replace_map: dict[str, str] = {}) -> str:
     tree = ast.parse(source)
@@ -298,7 +338,6 @@ def transpile(source: str, replace_map: dict[str, str] = {}) -> str:
         if result:
             parts.append(result)
     return "\n".join(parts)
-
 
 
 # if __name__ == "__main__":

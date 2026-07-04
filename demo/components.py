@@ -13,20 +13,18 @@ from htealeaf.elements import (
     html,
     link,
     script,
+    style,
     submit,
     textInput,
-    style
 )
-
 from htealeaf.js import js
-from htealeaf.js.common import alert, document, window, event, console
+from htealeaf.js.common import alert, console, document, event, window
 from htealeaf.server import Server, Session
 from htealeaf.server.http import Request
 from htealeaf.server.utils import redirect
 
 
-
-def auth_session(session: SessionData):
+def auth_session(session: Session):
     if session.has("userName"):
         return session["userName"]
     return None
@@ -35,7 +33,6 @@ def auth_session(session: SessionData):
 def init(app: Server):
     global cstore
     global todoStore
-
 
     SuperStore(app)
     cstore = Store({"counter": 1})
@@ -164,13 +161,11 @@ async def home(session, req: Request):
         else:
             alert("empty task")
 
-
     @js
     def addOnKeyPress(e):
         console.log(e.key)
         if e.key == "Enter" or e.keyCode == 13:
             addTodoIfNotEmpty("todo_item")
-
 
     @js
     def toggleModal():
@@ -182,7 +177,17 @@ async def home(session, req: Request):
     web = html(
         head(
             mincss,
-            style({"body": {"background-color": "teal"}, "#modal": {"position": "fixed", "z-index": "1", "top": "20%","left": "20%"}})
+            style(
+                {
+                    "body": {"background-color": "teal"},
+                    "#modal": {
+                        "position": "fixed",
+                        "z-index": "1",
+                        "top": "20%",
+                        "left": "20%",
+                    },
+                }
+            ),
         ),
         body(
             header(

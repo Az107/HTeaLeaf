@@ -22,9 +22,7 @@ class SuperStore:
         if isinstance(res_body, Component):
             for store_id in self.stores:
                 store = self.stores[store_id]
-                res_body.append(
-                    script(f'const {store.js} = new Store("{store._id}");')
-                )
+                res_body.append(script(f'const {store.js} = new Store("{store._id}");'))
 
     def __init__(self, server: Server | None = None):
         if not self._initialized:
