@@ -3,9 +3,7 @@ import json
 from typing import Any, Optional, Callable, Awaitable
 
 
-from HTeaLeaf.Elements.Elements import body
-
-from .HttpHeader import Headers
+from .header import Headers
 
 
 class HttpRequest:

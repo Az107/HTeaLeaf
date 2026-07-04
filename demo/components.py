@@ -1,5 +1,5 @@
-from HTeaLeaf import AuthStore, Store, SuperStore, use_state
-from HTeaLeaf.Elements import (
+from htealeaf import AuthStore, Store, SuperStore, use_state
+from htealeaf.elements import (
     body,
     button,
     checkbox,
@@ -15,13 +15,14 @@ from HTeaLeaf.Elements import (
     script,
     submit,
     textInput,
+    style
 )
-from HTeaLeaf.Elements.Elements import style
-from HTeaLeaf.JS import js
-from HTeaLeaf.JS.common import alert, document, window, event, console
-from HTeaLeaf.Server import Server, Session
-from HTeaLeaf.Server.Http import Request
-from HTeaLeaf.Server.utils import redirect
+
+from htealeaf.js import js
+from htealeaf.js.common import alert, document, window, event, console
+from htealeaf.server import Server, Session
+from htealeaf.server.http import Request
+from htealeaf.server.utils import redirect
 
 
 
