@@ -1,3 +1,5 @@
+import asyncio
+import functools
 import inspect
 import json
 import os
@@ -5,15 +7,13 @@ import re
 import typing
 from enum import Enum
 from typing import Callable
-from uuid import uuid4
-import asyncio
-import functools
 
 from ..elements.component import Component
 from ..elements.renderer import HTMLRenderer, init_render_ctx
 from ..state.helper_midleware import insert_helper_script
 from .adapter import ASGI
 from .http import Headers, Request, Response, Status
+from .session import SessionManager
 
 COOKIE_NAME = "HTeaLeaf-Session"
 
@@ -64,25 +64,6 @@ def extract_wildcards(path_regex: str, url: str) -> dict | None:
     return None
 
 
-class Session(dict):
-    """
-    A session object that behaves like a dictionary but allows attribute-style access.
-    """
-
-    def has(self, attr):
-        """Checks if a session attribute exists."""
-        return self.get(attr) is not None
-
-    def __getattr__(self, attr):
-        try:
-            return self[attr]
-        except KeyError:
-            raise AttributeError(f"'Session' object has no attribute '{attr}'")
-
-    def __setattr__(self, attr, value):
-        self[attr] = value
-
-
 def match_path(
     routes: dict[str, typing.Callable], path: str
 ) -> tuple[dict[str, str | object], typing.Callable] | None:
@@ -131,7 +112,7 @@ class Server:
         # rewrite __call__ to expose the correct func signature
         self.__call__ = self.adapter
         self.routes = {}
-        self.sessions: dict[str, Session] = {}
+        self.sessions: SessionManager = SessionManager()
         self._hooks: dict[ServerEvent, list[Callable[..., None]]] = {
             event: [] for event in ServerEvent
         }
@@ -157,15 +138,6 @@ class Server:
         for callback in events:
             callback(*payload)
 
-    def __create_session__(self):  # TODO: move to Session class
-        """Generates a unique session ID."""
-        session_id = str(uuid4())
-        self.sessions[session_id] = Session()
-        self.__call_hook__(
-            ServerEvent.new_session, session_id, self.sessions[session_id]
-        )
-        return session_id
-
     def route(self, path):
         """Registers a function as a handler for a given route pattern."""
 
@@ -185,17 +157,17 @@ class Server:
     def __handle_session__(self, cookies: dict):
         header_session_cookie = None
         if cookies.get(COOKIE_NAME) is None:
-            session_id = self.__create_session__()
+            session_id = self.sessions.create()
             header_session_cookie = ("Set-Cookie", f"{COOKIE_NAME}={session_id}")
         else:
             session_id = cookies[COOKIE_NAME]
-            if self.sessions.get(session_id) is None:
-                self.sessions[session_id] = Session()
-                self.__call_hook__(
-                    ServerEvent.new_session, session_id, self.sessions[session_id]
-                )
+            if not self.sessions.exist(session_id):
+                self.sessions.create(session_id)
+                # self.__call_hook__(
+                #     ServerEvent.new_session, session_id, self.sessions[session_id]
+                # )
 
-        return self.sessions[session_id], header_session_cookie
+        return self.sessions.get(session_id), header_session_cookie
 
     def __process_response__(self, response) -> Response:
         res_code = Status.Ok
@@ -252,7 +224,9 @@ class Server:
                 response = await handler(**params)
             else:
                 # response = handler(**params) # Run syncronously for now
-                response = await asyncio.get_event_loop().run_in_executor(None, functools.partial(handler, **params))
+                response = await asyncio.get_event_loop().run_in_executor(
+                    None, functools.partial(handler, **params)
+                )
 
             response = self.__process_response__(response)
         finally:

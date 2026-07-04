@@ -13,29 +13,26 @@ from htealeaf.elements import (
     html,
     link,
     script,
+    style,
     submit,
     textInput,
-    style
 )
-
 from htealeaf.js import js
-from htealeaf.js.common import alert, document, window, event, console
+from htealeaf.js.common import alert, console, document, event, window
 from htealeaf.server import Server, Session, SessionData
 from htealeaf.server.http import Request
 from htealeaf.server.utils import redirect
 
 
-
-def auth_session(session: SessionData):
-    if session.has("userName"):
-        return session["userName"]
+def auth_session(session: Session):
+    if session.data.has("userName"):
+        return session.data["userName"]
     return None
 
 
 def init(app: Server):
     global cstore
     global todoStore
-
 
     SuperStore(app)
     cstore = Store({"counter": 1})
@@ -97,13 +94,13 @@ async def LoginPage():
 
 
 async def user(session, req: Request):
-    if session.has("userName"):
-        return "Hello " + session.userName
+    if session.data.has("userName"):
+        return "Hello " + session.data["userName"]
     user = req.form()
     if user is None or "userName" not in user:
         return 401, await LoginPage()
     else:
-        session.userName = user["userName"]
+        session.data["userName"] = user["userName"]
         return redirect("/")
 
 
@@ -143,16 +140,17 @@ def todoItem(id, task):
 
 
 def logout(session):
-    if session.has("userName"):
-        del session["userName"]
+    if session.data.has("userName"):
+        del session.data["userName"]
     return redirect("/login")
 
 
-async def home(session, req: Request):
-    if not session.has("userName"):
+async def home(session: Session, req: Request):
+    if not session.data.has("userName"):
         return redirect("/login")
 
     modal_state = use_state("none")
+    modal_button_state = use_state("open")
     localCounter = use_state(0)
 
     @js
@@ -164,61 +162,101 @@ async def home(session, req: Request):
         else:
             alert("empty task")
 
-
     @js
     def addOnKeyPress(e):
         console.log(e.key)
         if e.key == "Enter" or e.keyCode == 13:
             addTodoIfNotEmpty("todo_item")
 
-
     @js
     def toggleModal():
         if modal_state.get() == "none":
             modal_state.set("block")
+            modal_button_state.set("close")
         else:
             modal_state.set("none")
+            modal_button_state.set("open")
 
     web = html(
         head(
             mincss,
-            style({"body": {"background-color": "teal"}, "#modal": {"position": "fixed", "z-index": "1", "top": "20%","left": "20%"}})
+            style(
+                {
+                    "body": {"background-color": "teal"},
+                    "#modal": {
+                        "position": "fixed",
+                        "z-index": "1",
+                        "top": "20%",
+                        "left": "20%",
+                    },
+                }
+            ),
         ),
         body(
             header(
                 div(
-                    h1("HTeaLeaf!").style(color="green"),
-                    button(f"Welcome {session['userName']} {localCounter}").attr(
+                    h1("HTeaLeaf!").style(color="teal"),
+                    button(f"Welcome {session.data['userName']} {localCounter}").attr(
                         onclick=window.location.replace("/logout")
                     ),
-                ).row()
+                )
+                .row()
+                .style(display="flex", align_items="center")
+            ).style(
+                margin="10px", border_radius="5px", shadow="0 0 10px rgba(0, 0, 0, 0.5)"
             ),
-            button("toggle modal").attr(onclick=toggleModal()),
             div(
-                "This is a modal: ",
-                modal_state,
+                button(f"{modal_button_state} modal").attr(onclick=toggleModal()),
                 div(
-                    button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
-                    localCounter,
-                    button("+").attr(onclick=localCounter.set(localCounter.get() + 1)),
-                ).row(),
-            )
-            .id("modal")
-            .classes("card")
-            .row()
-            .style(inline=True, display=modal_state),
-            div(
-                counter(),
+                    div(
+                        h3("Modal"),
+                        button("X")
+                        .attr(onclick=toggleModal())
+                        .style(background_color="red", color="white", float="right"),
+                    ).style(
+                        display="flex",
+                        align_items="center",
+                        justify_content="space-between",
+                        padding="0px",
+                        width="100%",
+                    ),
+                    "This is a modal: ",
+                    modal_state,
+                    div(
+                        button("-").attr(
+                            onclick=localCounter.set(localCounter.get() - 1)
+                        ),
+                        localCounter,
+                        button("+").attr(
+                            onclick=localCounter.set(localCounter.get() + 1)
+                        ),
+                    ).row(),
+                )
+                .id("modal")
+                .classes("card")
+                .row()
+                .style(inline=True, display=modal_state),
                 div(
-                    [
-                        todoItem(idx, c)
-                        for idx, c in enumerate(todoStore.auth(session).read("todo"))
-                    ]
-                ).style(padding="20px", height="200px", overflow_y="scroll"),
-                div(
-                    textInput().id("todo_item").attr(onkeyup=addOnKeyPress(event)),
-                    button("Create").attr(onclick=addTodoIfNotEmpty("todo_item")),
-                ).row(),
+                    counter(),
+                    div(
+                        [
+                            todoItem(idx, c)
+                            for idx, c in enumerate(
+                                todoStore.auth(session).read("todo")
+                            )
+                        ]
+                    ).style(padding="20px", height="200px", overflow_y="scroll"),
+                    div(
+                        textInput().id("todo_item").attr(onkeyup=addOnKeyPress(event)),
+                        button("Create").attr(onclick=addTodoIfNotEmpty("todo_item")),
+                    ).row(),
+                ),
+            ).style(
+                shadow="0 0 10px rgba(0, 0, 0, 0.5)",
+                background_color="white",
+                margin="20px",
+                padding="20px",
+                border_radius="5px",
             ),
         ),
     )

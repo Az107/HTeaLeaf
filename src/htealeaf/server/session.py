@@ -3,6 +3,7 @@ from time import time
 from typing import OrderedDict
 from uuid import uuid4
 
+
 class SessionData(dict):
     """
     A session object that behaves like a dictionary but allows attribute-style access.
@@ -21,6 +22,7 @@ class SessionData(dict):
     def __setattr__(self, attr, value):
         self[attr] = value
 
+
 @dataclass
 class Session:
     exp: float
@@ -31,19 +33,14 @@ class Session:
         self.data = SessionData()
 
     def ttl(self):
-        if time() - self.exp > 0:
-            return time() - self.exp
-        else:
-            return 0
+        return max(0, self.exp - time())
 
 
-
-
-class SessionManager():
-    def __init__(self, max_ttl = 10_000) -> None:
+class SessionManager:
+    def __init__(self, max_ttl=10_000) -> None:
         self.sessions: OrderedDict[str, Session] = OrderedDict()
         self.max_ttl = max_ttl
-
+        self.next_eviction = time() + self.max_ttl
 
     def create(self, session_id=None):
         """Generates a unique session ID."""
@@ -51,22 +48,38 @@ class SessionManager():
         exp = time() + self.max_ttl
 
         self.sessions[session_id] = Session(exp)
+        self.sessions.move_to_end(session_id)
         # self.__call_hook__(
         #     ServerEvent.new_session, session_id, self.sessions[session_id]
         # )
         return session_id
 
     def exist(self, session_id):
-        return self.sessions.get(session_id) is not None
+        session = self.sessions.get(session_id)
+        if session is None or session.ttl() == 0:
+            return False
+        return True
+
+    def _check_evict(self):
+        while self.sessions:
+            session_id, session = next(iter(self.sessions.items()))
+
+            if session.ttl() > 0:
+                self.next_eviction = session.exp
+                break
+
+            self.sessions.popitem(last=False)
 
     def get(self, session_id):
         session = self.sessions.get(session_id)
         if session is None:
             return None
-        if session.ttl() != 0:
+        if session.ttl() == 0:
             del self.sessions[session_id]
             return None
 
         session.exp = time() + self.max_ttl
-
+        self.sessions.move_to_end(session_id)
+        if time() > self.next_eviction:
+            self._check_evict()
         return session
