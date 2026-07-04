@@ -22,9 +22,13 @@ class SessionData(dict):
         self[attr] = value
 
 @dataclass
-class Session():
+class Session:
     exp: float
-    data: SessionData = SessionData()
+    data: SessionData
+
+    def __init__(self, exp: float) -> None:
+        self.exp = exp
+        self.data = SessionData()
 
     def ttl(self):
         if time() - self.exp > 0:
