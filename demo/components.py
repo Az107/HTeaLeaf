@@ -20,7 +20,7 @@ from htealeaf.elements import (
 
 from htealeaf.js import js
 from htealeaf.js.common import alert, document, window, event, console
-from htealeaf.server import Server, Session
+from htealeaf.server import Server, Session, SessionData
 from htealeaf.server.http import Request
 from htealeaf.server.utils import redirect
 
