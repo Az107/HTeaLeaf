@@ -1,3 +1,4 @@
+import html
 from typing import Any
 
 from HTeaLeaf.JS.JSCode import JSCode
@@ -6,6 +7,10 @@ from ..Component import Component
 from ..Elements import script
 from .render_context import get_render_ctx
 from .renderer import Renderer
+
+# Elements whose text content is CDATA in HTML and must not be escaped,
+# otherwise inline JS/CSS (e.g. injected @js functions) would break.
+RAW_TEXT_TAGS = {"script", "style"}
 
 
 class HTMLRenderer(Renderer[str]):
@@ -18,14 +23,16 @@ class HTMLRenderer(Renderer[str]):
 
         def __build_attr__(cmpt: Component) -> str:
             return " " + " ".join(
-                f"{k}='{v}'" if v is not None else f"{k}"
+                f"{k}='{html.escape(str(v), quote=True)}'" if v is not None else f"{k}"
                 for k, v in cmpt.attributes.items()
             )
 
         if len(cmpt.children) == 0:
             result = f"<{cmpt.name}{__build_attr__(cmpt)}/>\n"
         else:
-            inner_result = self.render(cmpt.children, subrender=True)
+            inner_result = self.render(
+                cmpt.children, subrender=True, raw_text=cmpt.name in RAW_TEXT_TAGS
+            )
             result = f"<{cmpt.name}{__build_attr__(cmpt)}>\n"
             if cmpt.styles is not None:
                 self.css[cmpt.id] = cmpt.styles
@@ -37,6 +44,7 @@ class HTMLRenderer(Renderer[str]):
         self,
         cmpt: Component | list | str | JSCode | Any,
         subrender=False,
+        raw_text=False,
     ) -> str:
 
         if not subrender:
@@ -50,14 +58,14 @@ class HTMLRenderer(Renderer[str]):
 
         html_parts = []
         if isinstance(cmpt, str):
-            html_parts.append(f"{cmpt}")
+            html_parts.append(cmpt if raw_text else html.escape(cmpt))
         elif isinstance(cmpt, list):
             for child in cmpt:
-                html = self.render(child, subrender=True)
-                html_parts.append(html)
+                rendered = self.render(child, subrender=True, raw_text=raw_text)
+                html_parts.append(rendered)
         elif isinstance(cmpt, Component):
-            html = self.__render_component__(cmpt)
-            html_parts.append(html)
+            rendered = self.__render_component__(cmpt)
+            html_parts.append(rendered)
         elif isinstance(cmpt, JSCode):
             # JSCode outside of an attribute should be a special tag {{jscode_name}}
             html_parts.append(f"{{{{{cmpt.raw}}}}}")
