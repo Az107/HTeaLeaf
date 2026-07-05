@@ -177,16 +177,13 @@ class Server:
 
     def __handle_session__(self, cookies: dict):
         header_session_cookie = None
-        if cookies.get(COOKIE_NAME) is None:
+        session_id = cookies.get(COOKIE_NAME)
+        # Never adopt a client-supplied session id we didn't issue: an unknown
+        # or missing cookie starts a fresh server-generated session and the new
+        # id is set on the response, preventing session fixation.
+        if session_id is None or self.sessions.get(session_id) is None:
             session_id = self.__create_session__()
             header_session_cookie = ("Set-Cookie", f"{COOKIE_NAME}={session_id}")
-        else:
-            session_id = cookies[COOKIE_NAME]
-            if self.sessions.get(session_id) is None:
-                self.sessions[session_id] = Session()
-                self.__call_hook__(
-                    ServerEvent.new_session, session_id, self.sessions[session_id]
-                )
 
         return self.sessions[session_id], header_session_cookie
 
