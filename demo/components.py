@@ -19,12 +19,12 @@ from htealeaf.elements import (
 )
 from htealeaf.js import js
 from htealeaf.js.common import alert, console, document, event, window
-from htealeaf.server import Server, Session
+from htealeaf.server import Server
 from htealeaf.server.http import Request
 from htealeaf.server.utils import redirect
 
 
-def auth_session(session: Session):
+def auth_session(session):
     if session.has("userName"):
         return session["userName"]
     return None
@@ -95,12 +95,12 @@ async def LoginPage():
 
 async def user(session, req: Request):
     if session.has("userName"):
-        return "Hello " + session.userName
+        return "Hello " + session["userName"]
     user = req.form()
     if user is None or "userName" not in user:
         return 401, await LoginPage()
     else:
-        session.userName = user["userName"]
+        session["userName"] = user["userName"]
         return redirect("/")
 
 
@@ -150,7 +150,9 @@ async def home(session, req: Request):
         return redirect("/login")
 
     modal_state = use_state("none")
+    modal_button_state = use_state("open")
     localCounter = use_state(0)
+    user_title = use_state(f"Welcome {session['userName']}")
 
     @js
     def addTodoIfNotEmpty(inputId):
@@ -171,8 +173,10 @@ async def home(session, req: Request):
     def toggleModal():
         if modal_state.get() == "none":
             modal_state.set("block")
+            modal_button_state.set("close")
         else:
             modal_state.set("none")
+            modal_button_state.set("open")
 
     web = html(
         head(
@@ -192,38 +196,70 @@ async def home(session, req: Request):
         body(
             header(
                 div(
-                    h1("HTeaLeaf!").style(color="green"),
-                    button(f"Welcome {session['userName']} {localCounter}").attr(
-                        onclick=window.location.replace("/logout")
+                    h1("HTeaLeaf!").style(color="teal"),
+                    button(user_title).attr(
+                        onclick=window.location.replace("/logout"),
+                        onmouseover=user_title.set("logout"),
+                        onmouseleave=user_title.set(f"Welcome {session['userName']}")
                     ),
-                ).row()
+                )
+                .row()
+                .style(display="flex", align_items="center")
+            ).style(
+                margin="10px", border_radius="5px", shadow="0 0 10px rgba(0, 0, 0, 0.5)"
             ),
-            button("toggle modal").attr(onclick=toggleModal()),
             div(
-                "This is a modal: ",
-                modal_state,
+                button(f"{modal_button_state} modal").attr(onclick=toggleModal()),
                 div(
-                    button("-").attr(onclick=localCounter.set(localCounter.get() - 1)),
-                    localCounter,
-                    button("+").attr(onclick=localCounter.set(localCounter.get() + 1)),
-                ).row(),
-            )
-            .id("modal")
-            .classes("card")
-            .row()
-            .style(inline=True, display=modal_state),
-            div(
-                counter(),
+                    div(
+                        h3("Modal"),
+                        button("X")
+                        .attr(onclick=toggleModal())
+                        .style(background_color="red", color="white", float="right"),
+                    ).style(
+                        display="flex",
+                        align_items="center",
+                        justify_content="space-between",
+                        padding="0px",
+                        width="100%",
+                    ),
+                    "This is a modal: ",
+                    modal_state,
+                    div(
+                        button("-").attr(
+                            onclick=localCounter.set(localCounter.get() - 1)
+                        ),
+                        localCounter,
+                        button("+").attr(
+                            onclick=localCounter.set(localCounter.get() + 1)
+                        ),
+                    ).row(),
+                )
+                .id("modal")
+                .classes("card")
+                .row()
+                .style(inline=True, display=modal_state),
                 div(
-                    [
-                        todoItem(idx, c)
-                        for idx, c in enumerate(todoStore.auth(session).read("todo"))
-                    ]
-                ).style(padding="20px", height="200px", overflow_y="scroll"),
-                div(
-                    textInput().id("todo_item").attr(onkeyup=addOnKeyPress(event)),
-                    button("Create").attr(onclick=addTodoIfNotEmpty("todo_item")),
-                ).row(),
+                    counter(),
+                    div(
+                        [
+                            todoItem(idx, c)
+                            for idx, c in enumerate(
+                                todoStore.auth(session).read("todo")
+                            )
+                        ]
+                    ).style(padding="20px", height="200px", overflow_y="scroll"),
+                    div(
+                        textInput().id("todo_item").attr(onkeyup=addOnKeyPress(event)),
+                        button("Create").attr(onclick=addTodoIfNotEmpty("todo_item")),
+                    ).row(),
+                ),
+            ).style(
+                shadow="0 0 10px rgba(0, 0, 0, 0.5)",
+                background_color="white",
+                margin="20px",
+                padding="20px",
+                border_radius="5px",
             ),
         ),
     )
