@@ -1,5 +1,6 @@
-from typing import Any
 import inspect
+from typing import Any
+
 from htealeaf.js.jscode import JSCode
 
 from ..component import Component
@@ -40,7 +41,7 @@ class HTMLRenderer(Renderer[str]):
     ) -> str:
 
         if inspect.iscoroutine(cmpt):
-            raise Exception( # TODO: implement Error class
+            raise Exception(  # TODO: implement Error class
                 "Component returned a coroutine — did you forget 'await'?\n"
                 f"  handler returned: {cmpt.__name__}\n"
                 f"  hint: change 'return {cmpt.__name__}()' to 'return await {cmpt.__name__}()'"
