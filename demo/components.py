@@ -152,6 +152,7 @@ async def home(session: Session, req: Request):
     modal_state = use_state("none")
     modal_button_state = use_state("open")
     localCounter = use_state(0)
+    user_title = use_state(f"Welcome {session.data['userName']}")
 
     @js
     def addTodoIfNotEmpty(inputId):
@@ -196,8 +197,10 @@ async def home(session: Session, req: Request):
             header(
                 div(
                     h1("HTeaLeaf!").style(color="teal"),
-                    button(f"Welcome {session.data['userName']} {localCounter}").attr(
-                        onclick=window.location.replace("/logout")
+                    button(user_title).attr(
+                        onclick=window.location.replace("/logout"),
+                        onmouseover=user_title.set("logout"),
+                        onmouseleave=user_title.set(f"Welcome {session.data['userName']}")
                     ),
                 )
                 .row()
