@@ -74,8 +74,8 @@ class SuperStore:
 
 
 class Store:
-    def __init__(self, default={}, subscribe=True, id=str(uuid4())):
-        self._id = id
+    def __init__(self, default={}, subscribe=True, id=None):
+        self._id = id if id is not None else str(uuid4())
         self.data = copy.copy(default)
         self.js = JSCode(f"store_{self._id[:8]}")
         if subscribe:
