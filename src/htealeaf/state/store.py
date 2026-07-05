@@ -166,7 +166,7 @@ class AuthStore:
         self.js = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
-    def auth(self, session: Session) -> Store:
+    def auth(self, session: SessionData) -> Store:
         key = self.auth_func(session)
         if key not in self.data:
             self.data[key] = Store(

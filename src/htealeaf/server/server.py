@@ -154,18 +154,27 @@ class Server:
         self.__call_hook__(ServerEvent.path_registered, path, path_regex, func)
         self.routes[path_regex] = func
 
-    def __handle_session__(self, cookies: dict):
+    def __handle_session__(self, cookies: dict, is_ssl: bool):
         header_session_cookie = None
-        if cookies.get(COOKIE_NAME) is None:
+        session_id = cookies.get(COOKIE_NAME)
+        if session_id is None or not self.sessions.exist(session_id):
             session_id = self.sessions.create()
-            header_session_cookie = ("Set-Cookie", f"{COOKIE_NAME}={session_id}")
-        else:
-            session_id = cookies[COOKIE_NAME]
-            if not self.sessions.exist(session_id):
-                self.sessions.create(session_id)
-                # self.__call_hook__(
-                #     ServerEvent.new_session, session_id, self.sessions[session_id]
-                # )
+            print(f"creating session: {session_id}")
+            secure = "; Secure" if is_ssl else ""
+            header_session_cookie = (
+                "Set-Cookie",
+                (
+                    f"{COOKIE_NAME}={session_id}; "
+                    "HttpOnly; "
+                    "SameSite=Lax; "
+                    "Path=/"
+                    # f"Max-Age={self.sessions.max_ttl}"
+                    f"{secure}"
+                )
+            )
+            # self.__call_hook__(
+            #     ServerEvent.new_session, session_id, self.sessions[session_id]
+            # )
 
         return self.sessions.get(session_id), header_session_cookie
 
@@ -214,8 +223,9 @@ class Server:
             k.strip(): v.strip()
             for k, v in (c.split("=", 1) for c in _cookies.split(";") if "=" in c)
         }
-
-        params["session"], session_header = self.__handle_session__(cookies)
+        session, session_header = self.__handle_session__(cookies, request.is_ssl)
+        assert session is not None
+        params["session"] = session.data
         params["cookies"] = cookies
         sig = inspect.signature(handler)
         params = {k: v for k, v in params.items() if k in sig.parameters}

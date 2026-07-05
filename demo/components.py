@@ -19,14 +19,14 @@ from htealeaf.elements import (
 )
 from htealeaf.js import js
 from htealeaf.js.common import alert, console, document, event, window
-from htealeaf.server import Server, Session, SessionData
+from htealeaf.server import Server
 from htealeaf.server.http import Request
 from htealeaf.server.utils import redirect
 
 
-def auth_session(session: Session):
-    if session.data.has("userName"):
-        return session.data["userName"]
+def auth_session(session):
+    if session.has("userName"):
+        return session["userName"]
     return None
 
 
@@ -94,13 +94,13 @@ async def LoginPage():
 
 
 async def user(session, req: Request):
-    if session.data.has("userName"):
-        return "Hello " + session.data["userName"]
+    if session.has("userName"):
+        return "Hello " + session["userName"]
     user = req.form()
     if user is None or "userName" not in user:
         return 401, await LoginPage()
     else:
-        session.data["userName"] = user["userName"]
+        session["userName"] = user["userName"]
         return redirect("/")
 
 
@@ -140,19 +140,19 @@ def todoItem(id, task):
 
 
 def logout(session):
-    if session.data.has("userName"):
-        del session.data["userName"]
+    if session.has("userName"):
+        del session["userName"]
     return redirect("/login")
 
 
-async def home(session: Session, req: Request):
-    if not session.data.has("userName"):
+async def home(session, req: Request):
+    if not session.has("userName"):
         return redirect("/login")
 
     modal_state = use_state("none")
     modal_button_state = use_state("open")
     localCounter = use_state(0)
-    user_title = use_state(f"Welcome {session.data['userName']}")
+    user_title = use_state(f"Welcome {session['userName']}")
 
     @js
     def addTodoIfNotEmpty(inputId):
@@ -200,7 +200,7 @@ async def home(session: Session, req: Request):
                     button(user_title).attr(
                         onclick=window.location.replace("/logout"),
                         onmouseover=user_title.set("logout"),
-                        onmouseleave=user_title.set(f"Welcome {session.data['userName']}")
+                        onmouseleave=user_title.set(f"Welcome {session['userName']}")
                     ),
                 )
                 .row()

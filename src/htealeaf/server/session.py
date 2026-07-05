@@ -49,9 +49,6 @@ class SessionManager:
 
         self.sessions[session_id] = Session(exp)
         self.sessions.move_to_end(session_id)
-        # self.__call_hook__(
-        #     ServerEvent.new_session, session_id, self.sessions[session_id]
-        # )
         return session_id
 
     def exist(self, session_id):

@@ -19,6 +19,7 @@ class HttpRequest:
         headers: list[tuple[str, str]] | dict[str, str] = [],
         body: bytes | None = None,
         body_handler: Callable[[], Awaitable[dict[str, Any]]] | None = None,
+        is_ssl: bool = False
     ):
 
         self.method: str = method
@@ -28,6 +29,7 @@ class HttpRequest:
         self.body: bytes | None = body
         self._body_handler = body_handler
         self.is_stream = body_handler is not None
+        self.is_ssl = is_ssl
 
     async def stream(self):
 
