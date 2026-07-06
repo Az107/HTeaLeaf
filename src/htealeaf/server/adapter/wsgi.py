@@ -1,5 +1,4 @@
 import asyncio
-from io import IOBase
 from typing import Iterator, Callable, Awaitable, Any
 
 from .adapter import adapter

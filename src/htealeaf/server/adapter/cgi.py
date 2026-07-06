@@ -3,7 +3,7 @@ import sys
 from types import FunctionType
 from urllib.parse import parse_qs, parse_qsl
 
-from ..http import Request, Response, Headers
+from ..http import Request, Response
 from .adapter import adapter
 
 @adapter
