@@ -130,9 +130,6 @@ class Store:
         pointer = self.__get_pointer__(path_list)
         return pointer
 
-    def react(self, path) -> Component:
-        return div(self.read(path)).classes(f"{self._id}{id}_react")
-
     def create(self, path: str, data):
         path_list = path.split("/") if path != "" else []
         parent = self.__get_pointer__(path_list[:-1])

@@ -62,14 +62,11 @@ def health(req: Request):
 
 
 def counter():
-
     return div(
         button("-").attr(
-            onclick=cstore.js.update(
-                "counter", cstore.read("counter") - 1
-            )  # TODO: remplace _js
+            onclick=cstore.js.update("counter", cstore.read("counter") - 1)
         ),
-        h3(cstore.react("counter")),
+        h3(cstore.read("counter")),
         button("+").attr(
             onclick=cstore.js.update("counter", cstore.read("counter") + 1)
         ),
@@ -200,7 +197,7 @@ async def home(session, req: Request):
                     button(user_title).attr(
                         onclick=window.location.replace("/logout"),
                         onmouseover=user_title.set("logout"),
-                        onmouseleave=user_title.set(f"Welcome {session['userName']}")
+                        onmouseleave=user_title.set(f"Welcome {session['userName']}"),
                     ),
                 )
                 .row()

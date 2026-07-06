@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import Any
 
@@ -21,21 +20,29 @@ class document(JSCode):
 def Not(code: JSCode):
     return JSCode(f"!{code}")
 
+
 def Set(code: JSCode, other: Any):
     return JSCode(f"{code.raw} = {other}")
+
 
 def Eq(code: JSCode, other: Any):
     return JSCode(f"{code.raw} == {other}")
 
+
 def Ne(code: JSCode, other: Any):
     return JSCode(f"{code.raw} != {other}")
+
 
 def Gt(code: JSCode, other: Any):
     return JSCode(f"{code.raw} > {other}")
 
+
 def Lt(code: JSCode, other: Any):
     return JSCode(f"{code.raw} < {other}")
 
+
+def wait(code: JSCode):
+    return JSCode(f"await {code}")
 
 
 console = JSCode("console")

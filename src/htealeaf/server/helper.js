@@ -93,17 +93,18 @@ class Store {
       config.body = typeof body == "string" ? body : JSON.stringify(body);
     }
     let result = await fetch(url, config);
-    if (result.ok) {
-      const content = await result.text();
-      for (let item of document.getElementsByClassName(
-        this.store_id + id + "_react",
-      )) {
-        item.innerText = content;
-      }
-      fetch_front();
+    if (result.ok && method != "GET") {
+      // const content = await result.text();
+      this._scheduleReconcile();
     }
     return result;
   }
+
+  _scheduleReconcile() {
+    clearTimeout(this._reconcileTimer);
+    this._reconcileTimer = setTimeout(() => fetch_front(), 0);
+  }
+
   async suscribe(callback) {}
   async set(id, data) {
     await this._apiCall("POST", id, data);
@@ -115,7 +116,8 @@ class Store {
     await this._apiCall("PATCH", id, data);
   }
   async get(id) {
-    await this._apiCall("GET", id);
+    const result = await this._apiCall("GET", id);
+    return result.ok ? await result.text() : undefined;
   }
 }
 

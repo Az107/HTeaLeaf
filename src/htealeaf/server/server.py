@@ -159,7 +159,6 @@ class Server:
         session_id = cookies.get(COOKIE_NAME)
         if session_id is None or not self.sessions.exist(session_id):
             session_id = self.sessions.create()
-            print(f"creating session: {session_id}")
             secure = "; Secure" if is_ssl else ""
             header_session_cookie = (
                 "Set-Cookie",
@@ -170,7 +169,7 @@ class Server:
                     "Path=/"
                     # f"Max-Age={self.sessions.max_ttl}"
                     f"{secure}"
-                )
+                ),
             )
             # self.__call_hook__(
             #     ServerEvent.new_session, session_id, self.sessions[session_id]
