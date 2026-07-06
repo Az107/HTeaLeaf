@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
 
-from .adapter import adapter
-
 from ..http import Headers, Request, Response
+from .adapter import adapter
 
 
 @dataclass
@@ -63,10 +62,10 @@ async def ASGI(
     receive: Callable[[], Awaitable[dict]],
     send: Callable[[Any], Awaitable[None]],
 ):
-    body: bytes = bytes()
+    body: bytes | None = None
     event = await receive()
-    more_body = event.get("more_body",False)
-    body = event["body"]
+    more_body = event.get("more_body", False)
+    body = event.get("body", None)
     headers = [(k.decode(), v.decode()) for k, v in scope["headers"]]
     path = scope["path"]
     root = scope.get("root_path", "")
@@ -79,7 +78,14 @@ async def ASGI(
         k, v = kv.split("=", 1)
         args[k] = v
     body_handler = receive if more_body else None
-    request = Request(scope["method"], path, args=args, headers=headers, body=body, body_handler=body_handler)
+    request = Request(
+        scope["method"],
+        path,
+        args=args,
+        headers=headers,
+        body=body,
+        body_handler=body_handler,
+    )
 
     response = await handler(request)
     body = (

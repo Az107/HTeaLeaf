@@ -3,7 +3,7 @@ import json
 from typing import Any
 from uuid import uuid4
 
-from ..elements import Component, div, script
+from ..elements import Component, script
 from ..js import JSCode
 from ..server import SessionData
 from ..server.http import Request
