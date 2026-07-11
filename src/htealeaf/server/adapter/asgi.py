@@ -84,6 +84,7 @@ async def ASGI(
         headers=headers,
         body=body,
         body_handler=body_handler,
+        is_ssl=scope.get("scheme") == "https",
     )
 
     response = await handler(request)

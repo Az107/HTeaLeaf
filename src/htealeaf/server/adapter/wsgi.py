@@ -42,7 +42,10 @@ def WSGI(handler: Callable[[Request], Awaitable[Response]],environ: dict[str, An
     else:
         raise Exception(f"Invalid body format: {type(input_)}")
 
-    request = Request(method, path, headers=headers, body=body, body_handler=None)
+    is_ssl = environ.get("wsgi.url_scheme") == "https"
+    request = Request(
+        method, path, headers=headers, body=body, body_handler=None, is_ssl=is_ssl
+    )
     response = asyncio.run(handler(request))
     start_response(response.status.to_str(), to_list(response.headers))
     response_body: bytes = (
