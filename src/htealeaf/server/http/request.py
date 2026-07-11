@@ -55,23 +55,30 @@ class HttpRequest:
         if content_length is None:
             return None
 
-        body_size = int(content_length or 0)
-        if body_size == 0 or self.body is None:
+        try:
+            body_size = int(content_length)
+        except (TypeError, ValueError):
             return None
-        if isinstance(self.body, io.BufferedReader):
-            if not self.body.closed and self.body.readable():
-                return self.body.read(body_size).decode("utf-8")
-            else:
-                return None
-        elif isinstance(self.body, bytes):
-            return self.body.decode("utf-8")
-        elif isinstance(self.body, str):
+        if body_size <= 0 or self.body is None:
+            return None
+
+        if isinstance(self.body, str):
             return self.body
+        elif isinstance(self.body, io.BufferedReader):
+            if self.body.closed or not self.body.readable():
+                return None
+            raw = self.body.read(body_size)
+        elif isinstance(self.body, bytes):
+            raw = self.body
         elif hasattr(self.body, "__iter__"):
-            result = b"".join([d for d in iter(self.body)])
-            return result.decode("utf-8")
+            raw = b"".join([d for d in iter(self.body)])
         else:
             raise ValueError(f"Invalid body type: {type(self.body)}")
+
+        try:
+            return raw.decode("utf-8")
+        except UnicodeDecodeError:
+            return None
 
     def form(self) -> dict[str, str] | None:
         """
