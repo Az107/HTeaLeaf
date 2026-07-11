@@ -23,31 +23,28 @@ and HTeaLeaf takes care of keeping everything in sync automatically.
 pip install htealeaf
 ```
 
-Requires **Python ≥ 3.10**. HTeaLeaf has no runtime dependencies; bring your own
-WSGI/ASGI server (`wsgiref` from the standard library works for local development,
-`uvicorn` for ASGI).
+Requires **Python ≥ 3.10**. Bring your own WSGI/ASGI server (`wsgiref` from the
+standard library works for local development, `uvicorn` for ASGI).
 
 ---
 
 ## 🚀 Quick Example
 
 ```python
-from HTeaLeaf import htealeaf, adapters, Store
-from HTeaLeaf.Elements import div, h3, button
-from HTeaLeaf.State import enable_reactivity
+from htealeaf import HteaLeaf, SuperStore, Store, adapters
+from htealeaf.elements import div, h3, button
 
-app = htealeaf(adapters.WSGI)
-enable_reactivity(app)  # injects the client-side reactivity runtime
+app = HteaLeaf(adapters.WSGI)
+SuperStore(app)  # wires the store API routes and client-side runtime
 
-# Pass an explicit id so multiple stores don't collide.
-counter = Store({"count": 0}, id="counter")
+counter = Store({"count": 0})
 
 @app.route("/")
 def home():
     return div(
-        button("-").attr(onclick=counter.js.update("count", -1)),
-        h3(counter.react("count")),
-        button("+").attr(onclick=counter.js.update("count", 1)),
+        button("-").attr(onclick=counter.js.update("count", counter.read("count") - 1)),
+        h3(counter.read("count")),
+        button("+").attr(onclick=counter.js.update("count", counter.read("count") + 1)),
     )
 
 if __name__ == "__main__":
@@ -63,7 +60,8 @@ You can also write client-side logic directly in Python using the `@js` decorato
 and HTeaLeaf will compile it to JavaScript automatically:
 
 ```python
-from HTeaLeaf.JS import js
+from htealeaf.js import js
+from htealeaf.js.common import console
 
 @js
 def greet(event):
@@ -72,9 +70,9 @@ def greet(event):
 button("Click me").attr(onclick=greet)
 ```
 
-> **Note:** the `app` object returned by `htealeaf(...)` is itself the WSGI/ASGI
-> callable — pass it straight to your server (`make_server("", 8000, app)`), there is
-> no separate `.wsgi_app` attribute.
+> **Note:** the `HteaLeaf` app object is itself the WSGI/ASGI callable — pass it
+> straight to your server (`make_server("", 8000, app)`), there is no separate
+> `.wsgi_app` attribute.
 
 ---
 
@@ -83,11 +81,10 @@ button("Click me").attr(onclick=greet)
 The same app runs under ASGI by swapping the adapter:
 
 ```python
-from HTeaLeaf import htealeaf, adapters
-from HTeaLeaf.State import enable_reactivity
+from htealeaf import HteaLeaf, SuperStore, adapters
 
-app = htealeaf(adapters.ASGI)
-enable_reactivity(app)
+app = HteaLeaf(adapters.ASGI)
+SuperStore(app)
 # ... routes ...
 ```
 
@@ -130,9 +127,10 @@ uvicorn demo.demo_asgi:app   # ASGI
 - [x] Local route state (`use_state()`)
 - [x] Session support
 - [x] Client-side-only state (no server round-trip)
+- [x] Async first architecture
 - [ ] Render optimisation
 - [ ] Persistent Store backends (Redis, SQL, …)
-- [ ] Async first architecture
+- [ ] Session expiration (TTL + eviction) — in progress on `feature/alb-28`
 - [ ] CLI
 - [ ] Build system to static assets
 
