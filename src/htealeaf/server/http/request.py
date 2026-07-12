@@ -145,10 +145,6 @@ class HttpRequest:
 
         if isinstance(self.body, str):
             return self.body
-        elif isinstance(self.body, io.BufferedReader):
-            if self.body.closed or not self.body.readable():
-                return None
-            raw = self.body.read(body_size)
         elif isinstance(self.body, bytes):
             raw = self.body
         elif hasattr(self.body, "__iter__"):

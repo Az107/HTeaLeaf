@@ -200,7 +200,7 @@ class Server:
             self.__call_hook__(ServerEvent.on_render, res_body)
             renderer = HTMLRenderer()
             res_body = renderer.render(res_body)
-        elif type(res_body) is dict or type(res_body) is list:
+        elif isinstance(res_body, dict) or isinstance(res_body, list):
             content_type = "application/json"
             res_body = json.dumps(res_body)
 
