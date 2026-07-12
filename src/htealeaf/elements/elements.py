@@ -22,6 +22,7 @@ __all__ = [
     "label",
     "form",
     "checkbox",
+    "fileInput",
     "textInput",
     "option",
     "submit",
@@ -36,7 +37,6 @@ class head(Component, metaclass=ComponentMeta):
     pass
 
 
-
 class header(Component, metaclass=ComponentMeta):
     pass
 
@@ -45,20 +45,22 @@ class link(Component, metaclass=ComponentMeta):
     def __init__(self, *childs):
         super().__init__("link", *childs)
 
+
 class style(Component):
-    def __init__(self, styles: dict[str,dict[str,str]] | str, href: str|None = None):
+    def __init__(
+        self, styles: dict[str, dict[str, str]] | str, href: str | None = None
+    ):
         if href:
-           return  link().attr(rel="stylesheet", href=href)
+            return link().attr(rel="stylesheet", href=href)
 
         content = ""
         if isinstance(styles, dict):
             for k in styles:
-                content += style._parse_block_(k,styles[k])
+                content += style._parse_block_(k, styles[k])
         else:
             content = styles
 
         super().__init__("style", content)
-
 
     @staticmethod
     def _parse_block_(selector: str, content: dict) -> str:
@@ -110,6 +112,13 @@ class script(Component):
         # else:
 
 
+class img(Component, metaclass=ComponentMeta):
+    def __init__(self, src=None):
+        super().__init__("img")
+        if src is not None:
+            self.attr(src=src)
+
+
 class Table(Component, metaclass=ComponentMeta):
     pass
 
@@ -128,7 +137,6 @@ class th(Component, metaclass=ComponentMeta):
 
 class thead(Component, metaclass=ComponentMeta):
     pass
-
 
 
 class body(Component, metaclass=ComponentMeta):
@@ -188,6 +196,12 @@ class checkbox(Component):
 class textInput(Component):
     def __init__(self, *childs):
         super().__init__("input", *childs)
+
+
+class fileInput(Component):
+    def __init__(self, *childs):
+        super().__init__("input", *childs)
+        self.attr(type="file")
 
 
 class select(Component):

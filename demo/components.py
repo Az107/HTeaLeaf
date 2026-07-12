@@ -1,9 +1,12 @@
+import os
+
 from htealeaf import AuthStore, Store, SuperStore, use_state
 from htealeaf.elements import (
     body,
     button,
     checkbox,
     div,
+    fileInput,
     form,
     h1,
     h2,
@@ -17,10 +20,12 @@ from htealeaf.elements import (
     submit,
     textInput,
 )
+from htealeaf.elements.elements import img
 from htealeaf.js import js
 from htealeaf.js.common import alert, console, document, event, window
 from htealeaf.server import Server
 from htealeaf.server.http import Request
+from htealeaf.server.http.request import UploadFile
 from htealeaf.server.utils import redirect
 
 
@@ -34,6 +39,8 @@ def init(app: Server):
     global cstore
     global todoStore
 
+    os.makedirs("./uploads", exist_ok=True)
+
     SuperStore(app)
     cstore = Store({"counter": 1})
     todoStore = AuthStore(auth_session, {"todo": []})
@@ -43,6 +50,7 @@ def init(app: Server):
     app.add_path("/login", user)
     app.add_path("/example", userNav)
     app.add_path("/logout", logout)
+    app.add_path("/image", image)
     app.add_path("/", home)
 
 
@@ -50,6 +58,16 @@ mincss_url = (
     "https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
 )
 mincss = link().attr(rel="stylesheet", href=mincss_url)
+
+
+# This is a endpoint to serve static files
+# the server not serve static files yet
+def image(req: Request, session):
+    if not session:
+        return 401, "Unauthorized"
+
+    with open(session["avatar"], "rb") as f:
+        return 200, f.read()
 
 
 def health(req: Request):
@@ -84,21 +102,41 @@ def greet(name):
 async def LoginPage():
     return html(
         mincss,
-        form(textInput().id("userName").attr(name="userName"), submit("Login"))
+        form(
+            textInput().id("userName").attr(name="userName"),
+            fileInput().id("avatar").attr(name="avatar").attr(accept="image/*"),
+            submit("Login"),
+        )
         .action("/login")
-        .method("POST"),
+        .method("POST")
+        .attr(enctype="multipart/form-data"),
     )
 
 
+# /login
 async def user(session, req: Request):
     if session.has("userName"):
         return "Hello " + session["userName"]
-    user = req.form()
-    if user is None or "userName" not in user:
+    if req.method != "POST":
+        return 200, await LoginPage()
+    form = await req.multipart()
+    if form is None or "userName" not in form:
         return 401, await LoginPage()
-    else:
-        session["userName"] = user["userName"]
-        return redirect("/")
+
+    username = form["userName"]
+    if not isinstance(username, str) or not username.strip():
+        return 401, await LoginPage()
+
+    session["userName"] = username
+
+    avatar = form.get("avatar")
+    if isinstance(avatar, UploadFile) and avatar.filename:
+        session["avatar"] = f"./uploads/{username}_{avatar.filename}"
+        data = avatar.read()
+        with open(session["avatar"], "wb") as f:
+            f.write(data)
+
+    return redirect("/")
 
 
 async def userNav(req: Request):
@@ -199,6 +237,7 @@ async def home(session, req: Request):
                         onmouseover=user_title.set("logout"),
                         onmouseleave=user_title.set(f"Welcome {session['userName']}"),
                     ),
+                    img().attr(src="/image", height="50px", width="50px"),
                 )
                 .row()
                 .style(display="flex", align_items="center")
