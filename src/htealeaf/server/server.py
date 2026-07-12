@@ -1,4 +1,5 @@
 import asyncio
+import contextvars
 import functools
 import inspect
 import json
@@ -232,9 +233,12 @@ class Server:
             if inspect.iscoroutinefunction(handler):
                 response = await handler(**params)
             else:
-                # response = handler(**params) # Run syncronously for now
+                # copy_context so the render context (a ContextVar) set by
+                # init_render_ctx is visible inside the executor thread;
+                # otherwise use_state()/@js registrations are silently lost
+                context = contextvars.copy_context()
                 response = await asyncio.get_event_loop().run_in_executor(
-                    None, functools.partial(handler, **params)
+                    None, functools.partial(context.run, handler, **params)
                 )
 
             response = self.__process_response__(response)
