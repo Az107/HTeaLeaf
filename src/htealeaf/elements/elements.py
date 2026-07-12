@@ -16,9 +16,9 @@ __all__ = [
     "body",
     "style",
     "div",
+    "img",
     "button",
     "select",
-    "option",
     "label",
     "form",
     "checkbox",
@@ -26,6 +26,13 @@ __all__ = [
     "textInput",
     "option",
     "submit",
+    "table",
+    "tr",
+    "td",
+    "th",
+    "thead"
+
+
 ]
 
 
@@ -119,7 +126,7 @@ class img(Component, metaclass=ComponentMeta):
             self.attr(src=src)
 
 
-class Table(Component, metaclass=ComponentMeta):
+class table(Component, metaclass=ComponentMeta):
     pass
 
 
@@ -234,6 +241,7 @@ class form(Component):
     def method(self, method):
         self.attr(method=method)
         return self
+
 
 
 def tl_if(condition: JSCode | str | bool, *childs):

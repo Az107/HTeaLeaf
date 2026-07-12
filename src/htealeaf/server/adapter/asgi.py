@@ -23,12 +23,6 @@ class Scope:
     state: Optional[dict[str, Any]]
 
 
-# dict struct
-# recive event:
-#     type: str
-#     body: bytes
-#     more_body: bool # if True wait for all the body chunks
-
 
 def response_start(
     status: int, headers: Iterable[tuple[bytes, bytes]], trailers: bool
