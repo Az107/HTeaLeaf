@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Iterable, Literal, Optional
+from urllib.parse import parse_qsl
 
 from ..http import Headers, Request, Response
 from .adapter import adapter
@@ -72,11 +73,9 @@ async def ASGI(
     if root and path.startswith(root):
         path = path[len(root) :] or "/"
 
-    args_kv = scope["query_string"].decode().split("&") if scope["query_string"] else []
-    args = {}
-    for kv in args_kv:
-        k, v = kv.split("=", 1)
-        args[k] = v
+    args = dict(
+        parse_qsl(scope["query_string"].decode(), keep_blank_values=True)
+    )
     body_handler = receive if more_body else None
     request = Request(
         scope["method"],
@@ -85,6 +84,7 @@ async def ASGI(
         headers=headers,
         body=body,
         body_handler=body_handler,
+        is_ssl=scope.get("scheme") == "https",
     )
 
     response = await handler(request)

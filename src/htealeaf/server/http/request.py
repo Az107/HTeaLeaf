@@ -129,9 +129,37 @@ class HttpRequest:
         return parts
 
     def text(self) -> str | None:
-        if self.body is None:
+        return self.__body_to_text__()
+
+    def __body_to_text__(self) -> str | None:
+        content_length = self.headers.get("content-length")
+        if content_length is None:
             return None
-        return self.body.decode("utf-8")
+
+        try:
+            body_size = int(content_length)
+        except (TypeError, ValueError):
+            return None
+        if body_size <= 0 or self.body is None:
+            return None
+
+        if isinstance(self.body, str):
+            return self.body
+        elif isinstance(self.body, io.BufferedReader):
+            if self.body.closed or not self.body.readable():
+                return None
+            raw = self.body.read(body_size)
+        elif isinstance(self.body, bytes):
+            raw = self.body
+        elif hasattr(self.body, "__iter__"):
+            raw = b"".join([d for d in iter(self.body)])
+        else:
+            raise ValueError(f"Invalid body type: {type(self.body)}")
+
+        try:
+            return raw.decode("utf-8")
+        except UnicodeDecodeError:
+            return None
 
     def form(self) -> dict[str, str] | None:
         """
