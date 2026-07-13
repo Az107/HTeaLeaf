@@ -1,9 +1,8 @@
 import asyncio
-from typing import Iterator, Callable, Awaitable, Any
-
-from .adapter import adapter
+from typing import Any, Awaitable, Callable, Iterator
 
 from ..http import Headers, Request, Response
+from .adapter import adapter
 
 # Cap the request body read so a large upload can't exhaust server memory.
 MAX_BODY_SIZE = 10 * 1024 * 1024  # 10 MiB
@@ -14,7 +13,11 @@ def to_list(headers: Headers) -> list[tuple[str, str]]:
 
 
 @adapter
-def WSGI(handler: Callable[[Request], Awaitable[Response]],environ: dict[str, Any], start_response) -> Iterator[bytes]:
+def WSGI(
+    handler: Callable[[Request], Awaitable[Response]],
+    environ: dict[str, Any],
+    start_response,
+) -> Iterator[bytes]:
     path = environ.get("PATH_INFO", "/")
     method = environ.get("REQUEST_METHOD", "GET")
     headers = {}
@@ -31,9 +34,7 @@ def WSGI(handler: Callable[[Request], Awaitable[Response]],environ: dict[str, An
     elif hasattr(input_, "read"):
         body = input_.read(MAX_BODY_SIZE + 1)
         if len(body) > MAX_BODY_SIZE:
-            start_response(
-                "413 Payload Too Large", [("Content-Type", "text/plain")]
-            )
+            start_response("413 Payload Too Large", [("Content-Type", "text/plain")])
             return iter([b"Payload Too Large"])
     elif isinstance(input_, bytes):
         body = input_

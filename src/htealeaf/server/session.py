@@ -4,6 +4,8 @@ from time import time
 from typing import OrderedDict
 from uuid import uuid4
 
+from htealeaf.error import SourceLocation, StateError
+
 
 class SessionData(dict):
     """
@@ -18,7 +20,12 @@ class SessionData(dict):
         try:
             return self[attr]
         except KeyError:
-            raise AttributeError(f"'Session' object has no attribute '{attr}'")
+            import sys
+
+            raise StateError(
+                f"'Session' object has no attribute '{attr}'",
+                hint=f"Use 'session.has({attr})' to check if the attribute exists first.",
+            )
 
     def __setattr__(self, attr, value):
         self[attr] = value
