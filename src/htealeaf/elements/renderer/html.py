@@ -24,7 +24,7 @@ class HTMLRenderer(Renderer[str]):
 
         def __build_attr__(cmpt: Component) -> str:
             return " " + " ".join(
-                f"{k}='{html.escape(str(v), quote=True)}'" if v is not None else f"{k}"
+                f"{k}='{html.escape(str(v), quote=False)}'" if v is not None else f"{k}"
                 for k, v in cmpt.attributes.items()
             )
 

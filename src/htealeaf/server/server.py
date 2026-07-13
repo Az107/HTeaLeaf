@@ -113,7 +113,7 @@ class Server:
         # rewrite __call__ to expose the correct func signature
         self.__call__ = self.adapter
         self.routes = {}
-        self.sessions: SessionManager = SessionManager(max_ttl=20)
+        self.sessions: SessionManager = SessionManager()
         self._hooks: dict[ServerEvent, list[Callable[..., None]]] = {
             event: [] for event in ServerEvent
         }

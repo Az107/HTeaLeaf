@@ -103,8 +103,8 @@ class JSFunction:
         for arg in args:
             if isinstance(arg, JSCode):
                 arg = arg
-            elif hasattr(arg, "_js"):
-                arg = arg._js
+            elif hasattr(arg, "js"):
+                arg = arg.js
             processed.append(arg)
         return JSCode(f"{self.name}")(*processed)
 
