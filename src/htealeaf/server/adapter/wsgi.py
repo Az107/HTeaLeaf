@@ -1,6 +1,7 @@
 import asyncio
 from typing import Iterator, Callable, Awaitable, Any
 
+
 from .adapter import adapter
 
 from ..http import Headers, Request, Response
@@ -18,10 +19,15 @@ def WSGI(handler: Callable[[Request], Awaitable[Response]],environ: dict[str, An
     path = environ.get("PATH_INFO", "/")
     method = environ.get("REQUEST_METHOD", "GET")
     headers = {}
+    for env in environ:
+        print(env)
     try:
         headers["content_length"] = int(environ.get("CONTENT_LENGTH", 0))
     except ValueError:
         headers["content_length"] = 0
+
+    headers["content_type"] = environ.get("CONTENT_TYPE")
+
     for k in environ:
         if k.startswith("HTTP_"):
             headers[k[5:]] = environ[k]
