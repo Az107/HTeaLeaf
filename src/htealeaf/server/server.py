@@ -113,7 +113,7 @@ class Server:
         # rewrite __call__ to expose the correct func signature
         self.__call__ = self.adapter
         self.routes = {}
-        self.sessions: SessionManager = SessionManager()
+        self.sessions: SessionManager = SessionManager(max_ttl=20)
         self._hooks: dict[ServerEvent, list[Callable[..., None]]] = {
             event: [] for event in ServerEvent
         }
@@ -160,21 +160,21 @@ class Server:
         session_id = cookies.get(COOKIE_NAME)
         if session_id is None or not self.sessions.exist(session_id):
             session_id = self.sessions.create()
-            secure = "; Secure" if is_ssl else ""
-            header_session_cookie = (
-                "Set-Cookie",
-                (
-                    f"{COOKIE_NAME}={session_id}; "
-                    "HttpOnly; "
-                    "SameSite=Lax; "
-                    "Path=/"
-                    # f"Max-Age={self.sessions.max_ttl}"
-                    f"{secure}"
-                ),
-            )
-            # self.__call_hook__(
-            #     ServerEvent.new_session, session_id, self.sessions[session_id]
-            # )
+        secure = "; Secure" if is_ssl else ""
+        header_session_cookie = (
+            "Set-Cookie",
+            (
+                f"{COOKIE_NAME}={session_id}; "
+                "HttpOnly; "
+                "SameSite=Lax; "
+                "Path=/; "
+                f"Max-Age={self.sessions.max_ttl}"
+                f"{secure}"
+            ),
+        )
+        # self.__call_hook__(
+        #     ServerEvent.new_session, session_id, self.sessions[session_id]
+        # )
 
         return self.sessions.get(session_id), header_session_cookie
 
