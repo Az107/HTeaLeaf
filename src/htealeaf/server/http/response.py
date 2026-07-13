@@ -1,5 +1,10 @@
 from __future__ import annotations
+
+from asyncio.base_events import Server
 from enum import Enum
+
+from htealeaf.error import ServerError
+
 from .header import Headers
 
 
@@ -8,25 +13,30 @@ class HttpResponse:
     headers: Headers
     body: str | bytes
 
-    def __init__(self, status: HttpStatus | tuple[int,str] | int, headers: Headers | list[tuple[str,str]], body: str | bytes, / ):
+    def __init__(
+        self,
+        status: HttpStatus | tuple[int, str] | int,
+        headers: Headers | list[tuple[str, str]],
+        body: str | bytes,
+        /,
+    ):
         if isinstance(status, HttpStatus):
             self.status = status
-        elif isinstance(status,tuple):
+        elif isinstance(status, tuple):
             self.status = HttpStatus.custom(status[0], status[1])
         elif isinstance(status, int):
             self.status = HttpStatus.from_int(status)
         else:
-            raise Exception(f"invalid status: {status}")
+            raise ServerError(f"invalid status: {status}")
 
-        if isinstance(headers,Headers):
+        if isinstance(headers, Headers):
             self.headers = headers
-        elif isinstance(headers,list):
+        elif isinstance(headers, list):
             self.headers = Headers(headers)
         else:
-            raise Exception("invalid headers")
+            raise ServerError("invalid headers")
 
         self.body = body
-
 
 
 class HttpStatus(Enum):
@@ -46,8 +56,7 @@ class HttpStatus(Enum):
     NotImplemented = 501, "Not Implemented"
     BadGateway = 502, "Bad Gateway"
     ServiceUnavailable = 503, "Service Unavailable"
-    _Other = None, None # Placeholder
-
+    _Other = None, None  # Placeholder
 
     @classmethod
     def custom(cls, code, message):
@@ -60,16 +69,14 @@ class HttpStatus(Enum):
         for status in cls:
             if status.value[0] == code:
                 return status
-        raise Exception(f"Invalid status {code}")
-
+        raise ServerError(f"Invalid status {code}")
 
     def to_int(self) -> int:
         if self.value[0] is None:
-            raise Exception(f"Invalid status {self.value}")
+            raise ServerError(f"Invalid status {self.value}")
         return self.value[0]
-
 
     def to_str(self) -> str:
         if self.value is None:
-            raise Exception(f"Invalid status {self}")
+            raise ServerError(f"Invalid status {self}")
         return f"{self.value[0]} {self.value[1]}"

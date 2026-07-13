@@ -1,6 +1,8 @@
 import asyncio
 from typing import Any, Awaitable, Callable, Iterator
 
+from htealeaf.error import ServerError
+
 from ..http import Headers, Request, Response
 from .adapter import adapter
 
@@ -41,7 +43,7 @@ def WSGI(
     elif isinstance(input_, str):
         body = input_.encode()
     else:
-        raise Exception(f"Invalid body format: {type(input_)}")
+        raise ServerError(f"[WSGI] Invalid body format: {type(input_)}")
 
     is_ssl = environ.get("wsgi.url_scheme") == "https"
     request = Request(

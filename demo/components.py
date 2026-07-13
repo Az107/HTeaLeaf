@@ -91,7 +91,8 @@ def counter():
     ).row()
 
 
-def greet(name):
+def greet(name, req: Request):
+    print(req.args)
     return (
         200,
         [("potato-header", "yay")],

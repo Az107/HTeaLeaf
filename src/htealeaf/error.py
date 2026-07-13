@@ -102,3 +102,16 @@ class StateError(HTeaLeafError):
 
 class RoutingError(HTeaLeafError):
     pass
+
+
+class ServerError(HTeaLeafError):
+    def __init__(
+        self,
+        message: str,
+        hint: Optional[str] = None,
+        location: Optional[SourceLocation] = None,
+    ):
+        self.message = message
+        self.hint = hint
+        self.location = None
+        super().__init__(message)

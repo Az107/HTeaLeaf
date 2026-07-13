@@ -10,7 +10,7 @@ from enum import Enum
 from threading import local
 from typing import Callable
 
-from htealeaf.error import RenderError, SourceLocation
+from htealeaf.error import RenderError, ServerError, SourceLocation
 
 from ..elements.component import Component
 from ..elements.renderer import HTMLRenderer, init_render_ctx
@@ -132,7 +132,7 @@ class Server:
 
         event_hooks = self._hooks.get(event)
         if event_hooks is None:
-            raise Exception("event dont exist")
+            raise ServerError("Event dont exist")
         event_hooks.append(callback)
 
     def __call_hook__(self, event: ServerEvent, *payload):
