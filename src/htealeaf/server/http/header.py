@@ -1,5 +1,3 @@
-from asyncio.base_events import Server
-
 from htealeaf.error import ServerError
 
 BANNED_HEADERS = []

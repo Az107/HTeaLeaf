@@ -1,5 +1,4 @@
 import json
-from asyncio.base_events import Server
 from dataclasses import dataclass
 from tempfile import SpooledTemporaryFile
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Awaitable, Callable, Optional
@@ -93,7 +92,7 @@ class HttpRequest:
             name, filename = parse_content_disposition(disposition)
             if name is None:
                 raise ServerError(
-                    f" Content-Disposition header is missing 'name' parameter"
+                    "Content-Disposition header is missing 'name' parameter"
                 )
             if current["is_file"]:
                 content_type = next(

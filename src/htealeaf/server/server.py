@@ -7,7 +7,6 @@ import os
 import re
 import typing
 from enum import Enum
-from threading import local
 from typing import Callable
 
 from htealeaf.error import RenderError, ServerError, SourceLocation
