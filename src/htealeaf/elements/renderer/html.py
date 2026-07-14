@@ -23,22 +23,27 @@ class HTMLRenderer(Renderer[str]):
         """
 
         def __build_attr__(cmpt: Component) -> str:
-            return " " + " ".join(
-                f"{k}='{html.escape(str(v), quote=False)}'" if v is not None else f"{k}"
-                for k, v in cmpt.attributes.items()
-            )
+            parts = []
+            for k, v in cmpt.attributes.items():
+                if v is None:
+                    parts.append(k)
+                elif isinstance(v, JSCode):
+                    parts.append(f"{k}='{v}'")
+                else:
+                    parts.append(f"{k}='{html.escape(str(v), quote=True)}'")
+            return " " + " ".join(parts)
 
         if len(cmpt.children) == 0:
-            result = f"<{cmpt.name}{__build_attr__(cmpt)}/>\n"
+            result = f"<{cmpt.name}{__build_attr__(cmpt)}/>"
         else:
             inner_result = self.render(
                 cmpt.children, subrender=True, raw_text=cmpt.name in RAW_TEXT_TAGS
             )
-            result = f"<{cmpt.name}{__build_attr__(cmpt)}>\n"
+            result = f"<{cmpt.name}{__build_attr__(cmpt)}>"
             if cmpt.styles is not None:
                 self.css[cmpt.id] = cmpt.styles
             result += inner_result
-            result += f"</{cmpt.name}>\n"
+            result += f"</{cmpt.name}>"
         return result
 
     def render(

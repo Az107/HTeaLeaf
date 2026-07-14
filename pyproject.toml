@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "asyncio>=4.0.0",
+    "pytest>=9.1.1",
     "python-multipart>=0.0.32",
     "uvicorn>=0.51.0",
 ]
@@ -17,3 +18,14 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
 "HTeaLeaf.Server" = ['*.js']
+
+
+[tool.pytest]
+minversion = "9.0"
+# addopts = ["-ra", "-q"]
+pythonpath = [
+  "src"
+]
+testpaths = [
+    "tests/*.py",
+]
