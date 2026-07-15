@@ -12,7 +12,7 @@ class Component:
     """
 
     def __init__(
-        self, name, *childs: Union[str, List[Any], "Component", "JSCode"]
+        self, name, *childs: Union[str, List[Any], "Component", "JSCode", None]
     ) -> None:
         """
         Initializes a new Component instance.
@@ -23,7 +23,7 @@ class Component:
 
         self.styles: str | None = None
         self.name = name
-        self.children: list[Component | str | list | JSCode] = list(childs)
+        self.children: list[Component | str | list | JSCode | None] = list(childs)
         self.attributes: dict[str, str | None] = dict()
         self._id: str = self._generate_id()
 

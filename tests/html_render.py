@@ -15,6 +15,13 @@ def test_render():
     assert result == EXPECTED_OUTPUT
 
 
+def test_render_none():
+    renderer = HTMLRenderer()
+    result = renderer.render(Component("div", None))
+    assert isinstance(result, str)
+    assert result == "<div ></div>"
+
+
 def test_paragraph():
     renderer = HTMLRenderer()
     paragraph = """

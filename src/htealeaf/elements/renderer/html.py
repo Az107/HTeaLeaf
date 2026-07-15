@@ -70,7 +70,9 @@ class HTMLRenderer(Renderer[str]):
                     node.append(script(fn))
 
         html_parts = []
-        if isinstance(cmpt, str):
+        if cmpt is None:
+            html_parts.append("")
+        elif isinstance(cmpt, str):
             html_parts.append(cmpt if raw_text else html.escape(cmpt))
         elif isinstance(cmpt, list):
             for child in cmpt:
