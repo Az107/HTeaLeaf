@@ -1,12 +1,14 @@
 from email.message import Message
 
+from htealeaf.error import ServerError
+
 
 def get_boundary(content_type: str) -> bytes:
     msg = Message()
     msg["content-type"] = content_type
     boundary = msg.get_param("boundary")
     if boundary is None:
-        raise ValueError("No boundary in content-type header")
+        raise ServerError("No boundary in content-type header")
     boundary = str(boundary)
     return boundary.encode("latin-1") if isinstance(boundary, str) else boundary
 

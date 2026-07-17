@@ -2,6 +2,7 @@ import html
 import inspect
 from typing import Any
 
+from htealeaf.error import RenderError, SourceLocation
 from htealeaf.js.jscode import JSCode
 
 from ..component import Component
@@ -54,10 +55,10 @@ class HTMLRenderer(Renderer[str]):
     ) -> str:
 
         if inspect.iscoroutine(cmpt):
-            raise Exception(  # TODO: implement Error class
-                "Component returned a coroutine — did you forget 'await'?\n"
+            raise RenderError(  # TODO: implement Error class
+                "Component returned a coroutine — did you forget 'await'?",
                 f"  handler returned: {cmpt.__name__}\n"
-                f"  hint: change 'return {cmpt.__name__}()' to 'return await {cmpt.__name__}()'"
+                f"  hint: change 'return {cmpt.__name__}()' to 'return await {cmpt.__name__}()'",
             )
 
         if not subrender:
@@ -88,6 +89,14 @@ class HTMLRenderer(Renderer[str]):
             try:
                 html_parts.append(str(cmpt))
             except Exception:
-                raise Exception("Can't render item")
+                import sys
+
+                raise RenderError(
+                    "Can't render item",
+                    location=SourceLocation(
+                        file=sys._getframe().f_code.co_filename,
+                        line=sys._getframe().f_lineno,
+                    ),
+                )
 
         return "".join(html_parts)

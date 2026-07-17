@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, AsyncGenerator, Awaitable, Callable, Opti
 
 from python_multipart import MultipartParser
 
+from htealeaf.error import ServerError
 from htealeaf.server.http.utils import get_boundary, parse_content_disposition
 
 from .header import Headers
@@ -90,7 +91,7 @@ class HttpRequest:
 
             name, filename = parse_content_disposition(disposition)
             if name is None:
-                raise ValueError(
+                raise ServerError(
                     "Content-Disposition header is missing 'name' parameter"
                 )
             if current["is_file"]:
@@ -116,7 +117,7 @@ class HttpRequest:
 
         content_type = self.headers.get("content-type")
         if content_type is None:
-            raise ValueError("No content-type header")
+            raise ServerError("No content-type header")
         boundary = get_boundary(content_type)
         parser = MultipartParser(boundary, callbacks)
         try:
@@ -150,7 +151,7 @@ class HttpRequest:
         elif hasattr(self.body, "__iter__"):
             raw = b"".join([d for d in iter(self.body)])
         else:
-            raise ValueError(f"Invalid body type: {type(self.body)}")
+            raise ServerError(f"Invalid body type: {type(self.body)}")
 
         try:
             return raw.decode("utf-8")

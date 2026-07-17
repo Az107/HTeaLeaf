@@ -9,6 +9,8 @@ import typing
 from enum import Enum
 from typing import Callable
 
+from htealeaf.error import RenderError, ServerError, SourceLocation
+
 from ..elements.component import Component
 from ..elements.renderer import HTMLRenderer, init_render_ctx
 from ..state.helper_midleware import insert_helper_script
@@ -129,7 +131,7 @@ class Server:
 
         event_hooks = self._hooks.get(event)
         if event_hooks is None:
-            raise Exception("event dont exist")
+            raise ServerError("Event dont exist")
         event_hooks.append(callback)
 
     def __call_hook__(self, event: ServerEvent, *payload):
@@ -203,6 +205,19 @@ class Server:
         elif isinstance(res_body, dict) or isinstance(res_body, list):
             content_type = "application/json"
             res_body = json.dumps(res_body)
+        elif inspect.iscoroutine(res_body):
+            frame = res_body.cr_frame
+            location = (
+                SourceLocation(file=frame.f_code.co_filename, line=frame.f_lineno)
+                if frame
+                else None
+            )
+            raise RenderError(  # TODO: implement Error class
+                "Component returned a coroutine — did you forget 'await'?",
+                f"  handler returned: {res_body.__name__}\n"
+                f"  change 'return {res_body.__name__}()' to 'return await {res_body.__name__}()'",
+                location=location,
+            )
 
         res_headers.add("Content-Type", content_type)
         return Response(res_code, res_headers, res_body)

@@ -1,6 +1,8 @@
 import ast
 from typing import Optional
 
+from htealeaf.error import TranspilerError
+
 # ---------------------------------------------------------------------------
 # Scope
 # ---------------------------------------------------------------------------
@@ -73,7 +75,7 @@ class PythonToJS(ast.NodeVisitor):
     # -----------------------------------------------------------------------
 
     def generic_visit(self, node: ast.AST):
-        raise NotImplementedError(
+        raise TranspilerError(
             f"Unhandled node type: {type(node).__name__}\n{ast.dump(node)}"
         )
 

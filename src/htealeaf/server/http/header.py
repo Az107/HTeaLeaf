@@ -1,3 +1,5 @@
+from htealeaf.error import ServerError
+
 BANNED_HEADERS = []
 
 
@@ -21,7 +23,7 @@ class Headers:
     def __setitem__(self, name: str, value: str) -> None:
         if name.lower() in self._data:
             if name.lower() in BANNED_HEADERS:
-                raise Exception("Invalid duplicated header")
+                raise ServerError("Invalid duplicated header")
             self._data[name] += "; " + value
         else:
             self._data[name] = value
