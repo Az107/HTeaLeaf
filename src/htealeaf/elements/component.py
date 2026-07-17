@@ -1,5 +1,3 @@
-import hashlib
-import json
 from typing import Any, List, Union
 
 from ..js import JSCode
@@ -12,7 +10,7 @@ class Component:
     """
 
     def __init__(
-        self, name, *childs: Union[str, List[Any], "Component", "JSCode"]
+        self, name, *childs: Union[str, List[Any], "Component", "JSCode", None]
     ) -> None:
         """
         Initializes a new Component instance.
@@ -23,22 +21,12 @@ class Component:
 
         self.styles: str | None = None
         self.name = name
-        self.children: list[Component | str | list | JSCode] = list(childs)
+        self.children: list[Component | str | list | JSCode | None] = list(childs)
         self.attributes: dict[str, str | None] = dict()
-        self._id: str = self._generate_id()
 
-    def _generate_id(self) -> str:
-        """Genera un ID determinista basado en el contenido del componente."""
-        content = {
-            "name": self.name,
-            "children": [
-                child._id if isinstance(child, Component) else str(child)
-                for child in self.children
-            ],
-        }
-        raw = json.dumps(content, sort_keys=True)
-        hash_str = hashlib.md5(raw.encode()).hexdigest()[:12]
-        return f"tl-{hash_str}"
+    @property
+    def _id(self) -> str | None:
+        return self.attributes.get("id")
 
     def id(self, id: str):
         """
@@ -47,9 +35,8 @@ class Component:
         :param id: The ID to assign.
         :return: The component instance (for method chaining).
         """
-
-        self._id = id
-        return self.attr(id=id)
+        self.attr(id=id)
+        return self
 
     def classes(self, classes):
         """

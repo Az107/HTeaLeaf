@@ -145,7 +145,6 @@ class Store:
     def create(self, path: str, data):
         path_list = path.split("/") if path != "" else []
         parent, item = self.__get_pointer__(path_list)
-        print(parent, item, data)
 
         if item is None:
             if isinstance(parent, dict):

@@ -23,10 +23,14 @@ def WSGI(
     path = environ.get("PATH_INFO", "/")
     method = environ.get("REQUEST_METHOD", "GET")
     headers = {}
+
     try:
         headers["content_length"] = int(environ.get("CONTENT_LENGTH", 0))
     except ValueError:
         headers["content_length"] = 0
+
+    headers["content_type"] = environ.get("CONTENT_TYPE")
+
     for k in environ:
         if k.startswith("HTTP_"):
             headers[k[5:]] = environ[k]
