@@ -1,5 +1,3 @@
-import hashlib
-import json
 from typing import Any, List, Union
 
 from ..js import JSCode
@@ -26,13 +24,10 @@ class Component:
         self.children: list[Component | str | list | JSCode | None] = list(childs)
         self.attributes: dict[str, str | None] = dict()
 
-
     @property
-    def id(self) -> str | None:
-
+    def _id(self) -> str | None:
         return self.attributes.get("id")
 
-    @id.setter
     def id(self, id: str):
         """
         Sets the ID of the component and adds it as an attribute.
@@ -40,8 +35,8 @@ class Component:
         :param id: The ID to assign.
         :return: The component instance (for method chaining).
         """
-        self._id = id
-        return self.attr(id=id)
+        self.attr(id=id)
+        return self
 
     def classes(self, classes):
         """

@@ -91,7 +91,7 @@ def return_helper():
         helper = open(os.path.dirname(__file__) + "/helper.js")
         return 200, helper.read()
     except Exception as e:
-        print(e)
+        print(e)  # TODO: change for a proper logger
         return "404 Not Found", "Not Found"
 
 
