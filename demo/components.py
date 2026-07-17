@@ -189,6 +189,9 @@ async def home(session, req: Request):
     modal_button_state = use_state("open")
     localCounter = use_state(0)
     user_title = use_state(f"Welcome {session['userName']}")
+    authed_store = todoStore.auth(session)
+    if authed_store is None:
+        return redirect("/login")
 
     @js
     def addTodoIfNotEmpty(inputId):
@@ -281,9 +284,7 @@ async def home(session, req: Request):
                     div(
                         [
                             todoItem(idx, c)
-                            for idx, c in enumerate(
-                                todoStore.auth(session).read("todo")
-                            )
+                            for idx, c in enumerate(authed_store.read("todo"))
                         ]
                     ).style(padding="20px", height="200px", overflow_y="scroll"),
                     div(

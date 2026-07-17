@@ -187,8 +187,10 @@ class AuthStore:
         self.js = JSCode(f"store_{self._id[:8]}")
         SuperStore().add(self._id, self)
 
-    def auth(self, session: SessionData) -> Store:
+    def auth(self, session: SessionData) -> Store | None:
         key = self.auth_func(session)
+        if key is None:
+            return None
         if key not in self.data:
             self.data[key] = Store(
                 default=copy.deepcopy(self.default), subscribe=False, id=self._id
@@ -218,4 +220,8 @@ class BadRequestError(Exception):
 
 
 class NotFoundError(Exception):
+    pass
+
+
+class NotAuthenticatedError(Exception):
     pass
