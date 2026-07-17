@@ -1,6 +1,7 @@
 from htealeaf.error import ServerError
 
 BANNED_HEADERS = []
+BANNED_CHARS = ["\r", "\n"]
 
 
 class Headers:
@@ -8,10 +9,18 @@ class Headers:
         self._data: dict[str, str] = {}
         for k in data:
             if isinstance(k, str) and isinstance(data, dict):
-                key = k.replace("_", "-").lower()
-                self._data[key] = data[k]
+                key = k
+                value = data[k]
             else:
-                self._data[k[0]] = k[1]
+                key = k[0]
+                value = k[1]
+
+            if any(c in k for c in BANNED_CHARS):
+                raise ServerError(f"Invalid header name: {k}")
+            if any(c in value for c in BANNED_CHARS):
+                raise ServerError(f"Invalid header value: {value}")
+            key = key.replace("_", "-").lower()
+            self._data[key] = value
 
     def __iter__(self):
         for k in self._data:
