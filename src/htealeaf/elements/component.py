@@ -1,0 +1,133 @@
+from typing import Any, List, Union
+
+from ..js import JSCode
+
+
+class Component:
+    """
+    Represents an HTML component with attributes, children, and optional inline styles.
+    This class allows constructing HTML elements programmatically and managing CSS styles.
+    """
+
+    def __init__(
+        self, name, *childs: Union[str, List[Any], "Component", "JSCode", None]
+    ) -> None:
+        """
+        Initializes a new Component instance.
+
+        :param name: The tag name of the HTML element.
+        :param childs: Optional children elements, which can be strings, lists, or other Component instances.
+        """
+
+        self.styles: str | None = None
+        self.name = name
+        self.children: list[Component | str | list | JSCode | None] = list(childs)
+        self.attributes: dict[str, str | None] = dict()
+
+    @property
+    def _id(self) -> str | None:
+        return self.attributes.get("id")
+
+    def id(self, id: str):
+        """
+        Sets the ID of the component and adds it as an attribute.
+
+        :param id: The ID to assign.
+        :return: The component instance (for method chaining).
+        """
+        self.attr(id=id)
+        return self
+
+    def classes(self, classes):
+        """
+        Adds a CSS class attribute to the component.
+
+        :param classes: CSS class names (space-separated).
+        :return: The component instance (for method chaining).
+        """
+
+        self.attributes["class"] = classes
+        return self
+
+    def get_child(self, name) -> "Component | None":
+        """
+        Returns the child component with the given name.
+
+        :param name: The name of the child component to retrieve.
+        :return: The child component instance, or None if not found.
+        """
+        for child in self.children:
+            if isinstance(child, Component) and child.name == name:
+                return child
+        return None
+
+    def style(self, **attr):
+        """
+        Adds inline styles to the component.
+
+        :param path: Optional path to an external CSS file.
+        :param attr: CSS properties to apply (e.g., color="red", margin="10px").
+        :return: The component instance (for method chaining).
+        """
+
+        self.attributes["style"] = " ".join(
+            f"{k.replace('_', '-')}:{v};" for k, v in attr.items()
+        )
+
+        return self
+
+    def attr(self, *args, **attr):
+        """
+        Adds custom attributes to the component.
+
+        :param attr: Dictionary of attribute names and values.
+        :return: The component instance (for method chaining).
+        """
+
+        for arg in args:
+            self.attributes[arg] = None
+
+        for k in attr:
+            # if type(attr[k]) is str:
+            value = attr[k]
+            # if isinstance(value, JSCode):
+            #     value = f"{{{{{str(value)}}}}}"
+            self.attributes[k] = value
+            # elif type(attr[k]) is FunctionType:
+            #     py_f = inspect.getsource(attr[k])
+            #     self.attributes[k] = f"""() => pyodide.runPython(`{py_f}`)"""
+
+        return self
+
+    def append(self, child: Union[str, "Component", list]):
+        """
+        Appends a child element to the component.
+
+        :param child: A Component, string, or list of elements.
+        :return: The component instance (for method chaining).
+        """
+
+        self.children.append(child)
+        return self
+
+    def prepend(self, child: Union[str, "Component", list]):
+        """
+        Prepends a child element to the component.
+
+        :param child: A Component, string, or list of elements.
+        :return: The component instance (for method chaining).
+        """
+
+        self.children.insert(0, child)
+        return self
+
+
+class ComponentMeta(type):
+    def __new__(cls, name, bases, dct):
+        if name not in ("Component", "ComponentMeta"):
+
+            def init(self, *childs):
+                super(self.__class__, self).__init__(name, *childs)
+
+            dct["__init__"] = init
+        return super().__new__(cls, name, bases, dct)

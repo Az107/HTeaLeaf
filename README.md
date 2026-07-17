@@ -20,10 +20,10 @@ and HTeaLeaf takes care of keeping everything in sync automatically.
 ## 🚀 Quick Example
 
 ```python
-from HTeaLeaf import Store, SuperStore, HTeaPot, adapters
-from HTeaLeaf.Elements import div, h3, button
+from htealeaf import Store, SuperStore, HTeaLeaf
+from htealeaf.elements import div, h3, button
 
-app = HTeaPot(adapters.WSGI)
+app = HTeaLeaf()
 SuperStore(app)
 
 counter = Store({"count": 0})
@@ -36,13 +36,13 @@ def home():
         button("+").attr(onclick=counter.js.update("count", 1)),
     )
 
-application = app.wsgi_app
 
-if __name__ == "__main__":
-    from wsgiref.simple_server import make_server
-    with make_server("", 8000, application) as server:
-        print("Serving at http://127.0.0.1:8000")
-        server.serve_forever()
+```
+
+The class HTeaLeaf is the app and the entrypoint of ASGI. 
+Next run 
+```bash
+$ uvicorn my_app:app
 ```
 
 Visit `http://127.0.0.1:8000`  a fully reactive counter, zero JavaScript written by hand.
@@ -51,13 +51,15 @@ You can also write client-side logic directly in Python using the `@js` decorato
 and HTeaLeaf will compile it to JavaScript automatically:
 
 ```python
-from HTeaLeaf.JS import js
+from htealeaf.JS import js
 
-@js
-def greet(event):
-    console.log("hello from Python-compiled JS!")
-
-button("Click me").attr(onclick=greet)
+@app.route("/hi")
+def say_hi():
+    @js
+    def greet(event):
+        console.log("hello from Python-compiled JS!")
+    
+    return button("Click me").attr(onclick=greet)
 ```
 
 ---
@@ -77,6 +79,10 @@ button("Click me").attr(onclick=greet)
 ```bash
 pip install htealeaf
 ```
+or 
+```bash
+uv add htealeaf
+```
 
 ---
 
@@ -89,9 +95,9 @@ pip install htealeaf
 - [x] Local route state (`use_state()`)
 - [x] Session support
 - [x] Client-side-only state (no server round-trip)
-- [ ] Render optimisation
+- [x] Render optimisation
 - [ ] Persistent Store backends (Redis, SQL, …)
-- [ ] Async first architecture
+- [x] Async first architecture
 - [ ] CLI
 - [ ] Build system to static assets
 
@@ -99,7 +105,7 @@ pip install htealeaf
 
 ## 📖 Documentation
 
-Full documentation is available in the [Wiki](https://github.com/Az107/HTeaLeaf/wiki/Welcome-to-the-HTeaLeaf!).
+Full documentation is available in the [wiki](https://github.com/Az107/HTeaLeaf/wiki).
 
 ---
 

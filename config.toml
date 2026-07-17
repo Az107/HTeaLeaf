@@ -1,9 +1,0 @@
-[HTEAPOT]
-port = 8081
-host = "0.0.0.0"
-threads = 4
-root = "./src"
-cache = true
-cache_ttl = 36
-[cgi]
-"py" = "python3"

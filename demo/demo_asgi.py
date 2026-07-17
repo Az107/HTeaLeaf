@@ -1,6 +1,6 @@
-from HTeaLeaf import adapters, htealeaf
+from htealeaf import HteaLeaf, adapters
 
 from .components import init
 
-app = htealeaf(adapters.ASGI)
+app = HteaLeaf(adapters.ASGI)
 init(app)
